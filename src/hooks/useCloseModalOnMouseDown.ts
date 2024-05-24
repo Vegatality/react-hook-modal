@@ -2,7 +2,7 @@
 
 import { DependencyList, useEffect } from 'react';
 
-import type { CloseModal, ModalInfoManageMap } from '../interface';
+import { CloseModal, ModalInfoManageMap } from '../interface';
 
 interface UseCloseModalOnMouseDownParam {
   modalInfoManageMap: ModalInfoManageMap;
@@ -44,5 +44,6 @@ export const useCloseModalOnMouseDown = ({
     return () => {
       document.removeEventListener('mousedown', closeOnMouseDown);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, dependencyList);
 };

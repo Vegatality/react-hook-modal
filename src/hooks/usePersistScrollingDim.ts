@@ -2,7 +2,7 @@
 
 import { DependencyList, useEffect } from 'react';
 
-import type { ModalInfoManageMap } from '../interface';
+import { ModalInfoManageMap } from '../interface';
 
 interface UsePersistScrollingDimParam {
   modalInfoManageMap: ModalInfoManageMap;
@@ -39,5 +39,6 @@ export const usePersistScrollingDim = ({ modalInfoManageMap, dependencyList = []
       document.body.style.top = '';
       window.scrollTo({ top: scrollY, behavior: 'instant' });
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, dependencyList);
 };
