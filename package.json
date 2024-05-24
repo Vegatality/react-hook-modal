@@ -9,13 +9,13 @@
     "name": "Hyeongmin Jo",
     "email": "vegatality@gmail.com"
   },
-  "main": "dist/react-hook-modal.cjs",
-  "module": "dist/react-hook-modal.js",
+  "main": "dist/index.umd.js",
+  "module": "dist/index.es.js",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/react-hook-modal.js",
-      "require": "./dist/react-hook-modal.cjs",
+      "import": "./dist/index.es.js",
+      "require": "./dist/index.umd.js",
       "types": "./dist/index.d.ts"
     }
   },
