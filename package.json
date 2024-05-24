@@ -17,6 +17,10 @@
       "types": "./dist/index.d.ts"
     }
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Vegatality/react-hook-modal"
+  },
   "files": [
     "dist"
   ],
