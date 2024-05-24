@@ -16,7 +16,7 @@ export default defineConfig({
       // Defines the entry point for the library build. It resolves
       // to src/index.ts,indicating that the library starts from this file.
       entry: path.resolve(__dirname, 'src/index.ts'),
-      name: 'react-hook-modal',
+      name: '@vegatality/react-hook-modal',
       // A function that generates the output file
       // name for different formats during the build
       fileName: (format) => `react-hook-modal.${format}.js`,

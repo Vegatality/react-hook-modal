@@ -1,5 +1,5 @@
 {
-  "name": "react-hook-modal",
+  "name": "@vegatality/react-hook-modal",
   "version": "0.1.1",
   "type": "module",
   "description": "A simple modal hook for React",
@@ -10,6 +10,7 @@
   },
   "main": "dist/react-hook-modal.cjs",
   "module": "dist/react-hook-modal.js",
+  "types": "dist/index.d.ts",
   "exports": {
     ".": {
       "import": "./dist/react-hook-modal.js",
