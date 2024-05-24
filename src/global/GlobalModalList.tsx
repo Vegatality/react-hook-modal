@@ -1,3 +1,5 @@
+'use client';
+
 import { useGlobalModalListState } from './useGlobalModalListDispatch';
 
 export const GlobalModalList = () => {

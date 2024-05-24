@@ -1,3 +1,5 @@
+'use client';
+
 import { RefCallback, useRef, useState } from 'react';
 import {
   CloseModal,
