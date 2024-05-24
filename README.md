@@ -4,12 +4,23 @@ This is a simple modal hook for React. It is a custom hook that allows you to cr
 
 ## Installation
 
+```bash
+# npm
+npm i @vegatality/react-hook-modal
+
+# yarn
+yarn add @vegatality/react-hook-modal
+
+# pnpm
+pnpm add @vegatality/react-hook-modal
+```
+
 ## Usage
 
 ### 1. Local State Layer
 
 ```tsx
-import { useModalList, type ModalComponent } from 'react-hook-modal';
+import { useModalList, type ModalComponent } from '@vegatality/react-hook-modal';
 
 // const SomeModal = ({ closeModal, modalRef }: ModalComponentProps<{ name: string }>) => {
 const SomeModal: ModalComponent<{ name: string }> = ({ closeModal, modalRef }) => {
@@ -38,7 +49,7 @@ const App = () => {
 #### 1-1. with Context API
 
 ```tsx
-import { useModalList, useModalContext, ModalProvider, type ModalComponent } from 'react-hook-modal';
+import { useModalList, useModalContext, ModalProvider, type ModalComponent } from '@vegatality/react-hook-modal';
 
 const SomeModal: ModalComponent<{ name: string }> = ({ closeModal, modalRef }) => {
   return (
@@ -82,7 +93,7 @@ import {
   GlobalModalList,
   GlobalModalListProvider,
   type ModalComponentProps,
-} from 'react-hook-modal';
+} from '@vegatality/react-hook-modal';
 
 const SomeModal = ({ closeModal, modalRef }: ModalComponentProps<{ name: string }>) => {
   return (
