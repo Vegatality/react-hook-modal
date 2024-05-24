@@ -23,10 +23,11 @@ pnpm add @vegatality/react-hook-modal
 import { useModalList, type ModalComponent } from '@vegatality/react-hook-modal';
 
 // const SomeModal = ({ closeModal, modalRef }: ModalComponentProps<{ name: string }>) => {
-const SomeModal: ModalComponent<{ name: string }> = ({ closeModal, modalRef }) => {
+const SomeModal: ModalComponent<{ name: string }> = ({ closeModal, modalRef, name }) => {
   return (
     <div ref={modalRef}>
       <h1>Some Modal</h1>
+      <p>{name}</p>
       <button onClick={closeModal}>Close</button>
     </div>
   );
@@ -38,7 +39,7 @@ const App = () => {
   return (
     <div>
       <ModalComponentList />
-      <button onClick={() => openModal({ modalKey: ['some'], ModalComponent: SomeModal, props: { name: 'some' } })}>
+      <button onClick={() => openModal({ modalKey: ['some'], ModalComponent: SomeModal, props: { name: 'some' }, options: { persist: true } })}>
         Open Modal 1
       </button>
     </div>
@@ -51,10 +52,11 @@ const App = () => {
 ```tsx
 import { useModalList, useModalContext, ModalProvider, type ModalComponent } from '@vegatality/react-hook-modal';
 
-const SomeModal: ModalComponent<{ name: string }> = ({ closeModal, modalRef }) => {
+const SomeModal: ModalComponent<{ name: string }> = ({ closeModal, modalRef, name }) => {
   return (
     <div ref={modalRef}>
       <h1>Some Modal</h1>
+      <p>{name}</p>
       <button onClick={closeModal}>Close</button>
     </div>
   );
@@ -95,10 +97,11 @@ import {
   type ModalComponentProps,
 } from '@vegatality/react-hook-modal';
 
-const SomeModal = ({ closeModal, modalRef }: ModalComponentProps<{ name: string }>) => {
+const SomeModal = ({ closeModal, modalRef, name }: ModalComponentProps<{ name: string }>) => {
   return (
     <div ref={modalRef}>
       <h1>Some Modal</h1>
+      <p>{name}</p>
       <button onClick={closeModal}>Close</button>
     </div>
   );
