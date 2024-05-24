@@ -1,30 +1,113 @@
-# React + TypeScript + Vite
+# A simple modal hook for React
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This is a simple modal hook for React. It is a custom hook that allows you to create a modal with a simple API.
 
-Currently, two official plugins are available:
+## Installation
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Usage
 
-## Expanding the ESLint configuration
+### 1. Local State Layer
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+```tsx
+import { useModalList, type ModalComponent } from 'react-hook-modal';
 
-- Configure the top-level `parserOptions` property like this:
+// const SomeModal = ({ closeModal, modalRef }: ModalComponentProps<{ name: string }>) => {
+const SomeModal: ModalComponent<{ name: string }> = ({ closeModal, modalRef }) => {
+  return (
+    <div ref={modalRef}>
+      <h1>Some Modal</h1>
+      <button onClick={closeModal}>Close</button>
+    </div>
+  );
+};
 
-```js
-export default {
-  // other rules...
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-  },
-}
+const App = () => {
+  const { ModalComponentList, openModal, closeModal, watch, destroy, ... } = useModalList();
+
+  return (
+    <div>
+      <ModalComponentList />
+      <button onClick={() => openModal({ modalKey: ['some'], ModalComponent: SomeModal, props: { name: 'some' } })}>
+        Open Modal 1
+      </button>
+    </div>
+  );
+};
 ```
 
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+#### 1-1. with Context API
+
+```tsx
+import { useModalList, useModalContext, ModalProvider, type ModalComponent } from 'react-hook-modal';
+
+const SomeModal: ModalComponent<{ name: string }> = ({ closeModal, modalRef }) => {
+  return (
+    <div ref={modalRef}>
+      <h1>Some Modal</h1>
+      <button onClick={closeModal}>Close</button>
+    </div>
+  );
+};
+
+const ChildComponent = () => {
+  const { openModal } = useModalContext();
+
+  return (
+    <button onClick={() => openModal({ modalKey: ['some'], ModalComponent: SomeModal, props: { name: 'some' } })}>
+      Open Modal 1
+    </button>
+  );
+};
+
+const App = () => {
+  const methods = useModalList();
+  const { ModalComponentList, openModal } = methods;
+
+  return (
+    <div>
+      <ModalComponentList />
+      <ModalProvider {...methods}>
+        <ChildComponent />
+      </ModalProvider>
+    </div>
+  );
+};
+```
+
+### 2. Global State Layer
+
+```tsx
+import {
+  useGlobalModalList,
+  GlobalModalList,
+  GlobalModalListProvider,
+  type ModalComponentProps,
+} from 'react-hook-modal';
+
+const SomeModal = ({ closeModal, modalRef }: ModalComponentProps<{ name: string }>) => {
+  return (
+    <div ref={modalRef}>
+      <h1>Some Modal</h1>
+      <button onClick={closeModal}>Close</button>
+    </div>
+  );
+};
+const App = () => {
+  const { openGlobalModal } = useGlobalModalList();
+
+  return (
+    <button onClick={() => openGlobalModal({ modalKey: ['some'], ModalComponent: SomeModal, props: { name: 'some' } })}>
+      Open Modal 1
+    </button>
+  );
+};
+
+const Main = () => {
+  return (
+    <GlobalModalListProvider>
+      <App />
+      <GlobalModalList />
+    </GlobalModalListProvider>
+  );
+};
+```

@@ -19,8 +19,21 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Vegatality/react-hook-modal"
+    "url": "git+https://github.com/Vegatality/react-hook-modal.git"
   },
+  "keywords": [
+    "react",
+    "hook",
+    "modal",
+    "modal-hook",
+    "react-hook",
+    "react-modal",
+    "react-hook-modal"
+  ],
+  "bugs": {
+    "url": "https://github.com/Vegatality/react-hook-modal/issues"
+  },
+  "homepage": "https://github.com/Vegatality/react-hook-modal#readme",
   "files": [
     "dist"
   ],

@@ -28,7 +28,8 @@ export const useCloseModalOnMouseDown = ({
 
         if (
           options?.persist === true ||
-          (Array.isArray(options?.persist) && modalMap.has(JSON.stringify(options.persist)))
+          (Array.isArray(options?.persist) && // TODO: must be structural key
+            options.persist.some((persistKey: string) => modalMap.has(JSON.stringify([persistKey]))))
         ) {
           return;
         }

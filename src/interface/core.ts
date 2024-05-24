@@ -5,14 +5,17 @@ export type StringifiedModalKey = string;
 
 export type OpenModalOptions = {
   /**
-   * is modal persist on background click
+   * #### Is modal persist on background click
+   * @description
+   * - If the persist option is set to a string array, the modal will persist if any of the modals in the array are open.
+   * - If the persist option is set to true, the modal will persist even if other modals are open.
    * @default false
    */
   persist?: boolean | ModalKey;
   /**
-   * is background scrollable
-   * @default false
+   * #### Is background scrollable
    * @description If any modal in the modalList has the scrollable option set to false, the background will become unscrollable, even if other modals have this option set to true.
+   * @default false
    */
   scrollable?: boolean;
 };
@@ -26,8 +29,8 @@ export interface ModalCallback {
 interface OptionalModalProps {
   closeModal?: () => Promise<void>;
   submitModal?: (e?: React.BaseSyntheticEvent) => Promise<void>;
-  modalRef: ReturnType<SetModalRef>;
-  stringifiedCurrentModalKey: StringifiedModalKey;
+  modalRef?: ReturnType<SetModalRef>;
+  stringifiedCurrentModalKey?: StringifiedModalKey;
 }
 
 export interface RequiredModalProps extends Required<OptionalModalProps> {}
@@ -79,22 +82,12 @@ export interface OpenedModalState<MC extends ModalComponent = ModalComponent> {
   ModalComponent: MC;
 }
 
-// type ModalProps<MC extends ModalComponent> = MC extends ModalComponent<infer P> ? P : never;
-// type ModalProps<MC extends ModalComponent> = Omit<
-//   ComponentProps<MC>,
-//   keyof RequiredModalProps
-// > extends PropsWithChildren
-//   ? // > extends never
-//     null
-//   : ModalCallback & Omit<ComponentProps<MC>, UnnecessaryModalPropsOnOpenModalParam>;
-
 type ExcludedKeysForProcessingOnOpenModalParam = 'modalKey' | 'modalProps' | 'modalRef';
 type UnnecessaryModalPropsOnOpenModalParam = keyof RequiredModalProps;
 interface OpenModalParam<MC extends ModalComponent = ModalComponent>
   extends Omit<OpenedModalState<MC>, ExcludedKeysForProcessingOnOpenModalParam | 'randomUniqueKey'> {
   modalKey: ModalKey;
   modalProps: ModalCallback & Omit<ComponentProps<MC>, UnnecessaryModalPropsOnOpenModalParam>;
-  // modalProps: ModalProps<MC>;
 }
 
 /**
