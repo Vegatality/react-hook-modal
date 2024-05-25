@@ -17,8 +17,8 @@ import {
   Watch,
 } from '../interface';
 import { GlobalModalListDispatchContext, GlobalModalListStateContext } from './useGlobalModalListDispatch';
-import { useCloseModalOnMouseDown } from '../hooks/useCloseModalOnMouseDown';
-import { usePersistScrollingDim } from '../hooks/usePersistScrollingDim';
+import { useCloseModalOnEventFire } from '../hooks/useCloseModalOnEventFire';
+import { useResistScrollingDim } from '../hooks/useResistScrollingDim';
 
 export const GlobalModalListProvider = ({ children, modalCountLimit }: GlobalModalListProviderProps) => {
   const initialLimitsRef = useRef<number | null>(modalCountLimit ?? null);
@@ -117,6 +117,10 @@ export const GlobalModalListProvider = ({ children, modalCountLimit }: GlobalMod
       );
     }
 
+    if (modalKey.length === 0 || modalKey.find((key) => key.length === 0)) {
+      throw new Error('The modal key must not be empty and must not contain an empty string.');
+    }
+
     const randomUniqueKey = crypto.randomUUID();
     const stringifiedModalKey: StringifiedModalKey = JSON.stringify(modalKey);
     const modalRef: ReturnType<SetModalRef> = setCustomGlobalModalRef({
@@ -155,11 +159,11 @@ export const GlobalModalListProvider = ({ children, modalCountLimit }: GlobalMod
   );
 
   // options
-  useCloseModalOnMouseDown({
+  useCloseModalOnEventFire({
     modalInfoManageMap: globalModalInfoManageMapRef.current,
     closeWithModalKeyImpl: closeGlobalModal,
   });
-  usePersistScrollingDim({
+  useResistScrollingDim({
     modalInfoManageMap: globalModalInfoManageMapRef.current,
     dependencyList: [openedGlobalModalList],
   });

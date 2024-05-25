@@ -4,7 +4,7 @@ import { DependencyList, useEffect } from 'react';
 
 import { ModalInfoManageMap } from '../interface';
 
-interface UsePersistScrollingDimParam {
+interface UseResistScrollingDimParam {
   modalInfoManageMap: ModalInfoManageMap;
   dependencyList?: DependencyList;
 }
@@ -12,7 +12,7 @@ interface UsePersistScrollingDimParam {
 /**
  * @see https://css-tricks.com/prevent-page-scrolling-when-a-modal-is-open/
  */
-export const usePersistScrollingDim = ({ modalInfoManageMap, dependencyList = [] }: UsePersistScrollingDimParam) => {
+export const useResistScrollingDim = ({ modalInfoManageMap, dependencyList = [] }: UseResistScrollingDimParam) => {
   useEffect(() => {
     // 모달이 하나도 없으면 fixed 처리하지 않음.
     if (modalInfoManageMap.size === 0) {

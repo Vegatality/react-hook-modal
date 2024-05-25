@@ -39,7 +39,7 @@ const App = () => {
   return (
     <div>
       <ModalComponentList />
-      <button onClick={() => openModal({ modalKey: ['some'], ModalComponent: SomeModal, props: { name: 'some' }, options: { persist: true } })}>
+      <button onClick={() => openModal({ modalKey: ['some'], ModalComponent: SomeModal, props: { name: 'some' }, options: { resistBackgroundClick: true } })}>
         Open Modal 1
       </button>
     </div>

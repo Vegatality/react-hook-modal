@@ -1,17 +1,28 @@
 import { ComponentProps, ComponentType, RefCallback } from 'react';
 
+/**
+ * TODO: It might be better to allow various array types(e.g. tuple type) for the structural modal key, not just a string array.
+ */
 export type ModalKey = readonly string[];
 export type StringifiedModalKey = string;
 
 export type OpenModalOptions = {
   /**
-   * #### Is modal persist on background click
+   * #### Is the modal resistant to background clicks
    * @description
-   * - If the persist option is set to a string array, the modal will persist if any of the modals in the array are open.
-   * - If the persist option is set to true, the modal will persist even if other modals are open.
+   * - If the resistBackgroundClick option is set to a string array, the modal will remain open if any modal with a key matching a string in the array is open.
+   * - If the resistBackgroundClick option is set to true, the modal will remain open even if user clicks on the background.
    * @default false
    */
-  persist?: boolean | ModalKey;
+  resistBackgroundClick?: boolean | ModalKey;
+  /**
+   * #### Is the modal resistant to the ESC key
+   * @description
+   * - If the resistESC option is set to a string array, the modal will remain open if any modal with a key matching a string in the array is open.
+   * - If the resistESC option is set to true, the modal will remain open even if user presses the ESC key.
+   * @default false
+   */
+  resistESC?: boolean | ModalKey;
   /**
    * #### Is background scrollable
    * @description If any modal in the modalList has the scrollable option set to false, the background will become unscrollable, even if other modals have this option set to true.

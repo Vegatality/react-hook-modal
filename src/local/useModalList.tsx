@@ -15,8 +15,8 @@ import {
   UseModalList,
   Watch,
 } from '../interface';
-import { useCloseModalOnMouseDown } from '../hooks/useCloseModalOnMouseDown';
-import { usePersistScrollingDim } from '../hooks/usePersistScrollingDim';
+import { useCloseModalOnEventFire } from '../hooks/useCloseModalOnEventFire';
+import { useResistScrollingDim } from '../hooks/useResistScrollingDim';
 
 export const useModalList: UseModalList = (useModalListParam = {}) => {
   const { modalCountLimit } = useModalListParam;
@@ -122,6 +122,10 @@ export const useModalList: UseModalList = (useModalListParam = {}) => {
       );
     }
 
+    if (modalKey.length === 0 || modalKey.find((key) => key.length === 0)) {
+      throw new Error('The modal key must not be empty and must not contain an empty string.');
+    }
+
     const randomUniqueKey = crypto.randomUUID();
     const stringifiedModalKey: StringifiedModalKey = JSON.stringify(modalKey);
     const modalRef: ReturnType<SetModalRef> = setCustomModalRef({
@@ -162,8 +166,8 @@ export const useModalList: UseModalList = (useModalListParam = {}) => {
   };
 
   // options
-  useCloseModalOnMouseDown({ modalInfoManageMap: modalInfoManageMapRef.current, closeWithModalKeyImpl: closeModal });
-  usePersistScrollingDim({ modalInfoManageMap: modalInfoManageMapRef.current, dependencyList: [openedModalList] });
+  useCloseModalOnEventFire({ modalInfoManageMap: modalInfoManageMapRef.current, closeWithModalKeyImpl: closeModal });
+  useResistScrollingDim({ modalInfoManageMap: modalInfoManageMapRef.current, dependencyList: [openedModalList] });
 
   return { watch, destroy, changeModalCountLimit, openModal, closeModal, ModalComponentList };
 };
