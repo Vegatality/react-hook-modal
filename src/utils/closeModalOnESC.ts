@@ -1,11 +1,11 @@
 import { CloseModal, ModalInfoManageMap } from '../interface';
 
-interface SetCloseOnESCPraram {
+interface SetCloseOnESCParam {
   modalInfoManageMap: ModalInfoManageMap;
   closeWithModalKeyImpl: CloseModal;
 }
 
-export const setCloseOnESC = ({ modalInfoManageMap, closeWithModalKeyImpl }: SetCloseOnESCPraram) => {
+export const setCloseOnESC = ({ modalInfoManageMap, closeWithModalKeyImpl }: SetCloseOnESCParam) => {
   const closeOnESC = (e: KeyboardEvent) => {
     if (modalInfoManageMap.size === 0) {
       return;

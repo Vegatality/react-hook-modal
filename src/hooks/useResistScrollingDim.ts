@@ -14,13 +14,13 @@ interface UseResistScrollingDimParam {
  */
 export const useResistScrollingDim = ({ modalInfoManageMap, dependencyList = [] }: UseResistScrollingDimParam) => {
   useEffect(() => {
-    // 모달이 하나도 없으면 fixed 처리하지 않음.
+    // Do not set fixed position if there are no modals.
     if (modalInfoManageMap.size === 0) {
       return;
     }
 
-    // modalInfoManageMap을 순회하면서 scrollable(기본값 false)이 false인 모달이 하나라도 없으면 fixed 처리하지 않음.
-    // scrollable이 false인 모달이 하나라도 있으면 fixed 처리함.
+    // Iterate through modalInfoManageMap, and if there isn't at least one modal where scrollable option  (default is false) is false, do not set fixed position.
+    // If there is at least one modal with scrollable set to false, set fixed position.
     if (
       !Array.from(modalInfoManageMap.values()).some(
         (managedModalInfo) => managedModalInfo.options?.scrollable === false,

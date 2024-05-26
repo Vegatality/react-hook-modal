@@ -1,4 +1,4 @@
-import { ComponentProps, ComponentType, RefCallback } from 'react';
+import { ComponentProps, ComponentType, Dispatch, RefCallback, SetStateAction } from 'react';
 
 /**
  * TODO: It might be better to allow various array types(e.g. tuple type) for the structural modal key, not just a string array.
@@ -33,14 +33,13 @@ export type OpenModalOptions = {
 
 export interface ModalCallback {
   onClose?: VoidFunction;
-  onOpen?: VoidFunction;
   onSubmit?: VoidFunction;
 }
 
 interface OptionalModalProps {
   closeModal?: () => Promise<void>;
   submitModal?: (e?: React.BaseSyntheticEvent) => Promise<void>;
-  modalRef?: ReturnType<SetModalRef>;
+  modalRef?: ReturnType<GenerateModalRef>;
   stringifiedCurrentModalKey?: StringifiedModalKey;
 }
 
@@ -82,12 +81,12 @@ export type ModalComponent<CustomProps = unknown> = ComponentType<CustomProps & 
 export type ModalComponentProps<CustomProps = unknown> = ComponentProps<ModalComponent<CustomProps>>;
 
 export interface OpenedModalState<MC extends ModalComponent = ModalComponent> {
-  randomUniqueKey: string;
+  internalUniqueKey: number;
   modalKey: StringifiedModalKey;
   /**
    * The modalRef is managed as a separate property from modalProps.
    */
-  modalRef: ReturnType<SetModalRef>;
+  modalRef: ReturnType<GenerateModalRef>;
   modalProps: Omit<ComponentProps<MC>, 'modalRef' | 'stringifiedCurrentModalKey'>;
   options?: OpenModalOptions;
   ModalComponent: MC;
@@ -96,25 +95,36 @@ export interface OpenedModalState<MC extends ModalComponent = ModalComponent> {
 type ExcludedKeysForProcessingOnOpenModalParam = 'modalKey' | 'modalProps' | 'modalRef';
 type UnnecessaryModalPropsOnOpenModalParam = keyof RequiredModalProps;
 interface OpenModalParam<MC extends ModalComponent = ModalComponent>
-  extends Omit<OpenedModalState<MC>, ExcludedKeysForProcessingOnOpenModalParam | 'randomUniqueKey'> {
+  extends Omit<OpenedModalState<MC>, ExcludedKeysForProcessingOnOpenModalParam | 'internalUniqueKey'> {
   modalKey: ModalKey;
   modalProps: ModalCallback & Omit<ComponentProps<MC>, UnnecessaryModalPropsOnOpenModalParam>;
 }
+type SetOpenedModalList = Dispatch<SetStateAction<OpenedModalState<ModalComponent>[]>>;
 
+interface OpenModalImplParam<MC extends ModalComponent = ModalComponent> extends OpenModalParam<MC> {
+  modalCountLimit: number | null;
+  openedModalList: OpenedModalState<ModalComponent>[];
+  setOpenedModalList: SetOpenedModalList;
+  modalInfoManageMap: ModalInfoManageMap;
+}
+export type OpenModalImpl = <MC extends ModalComponent<any>>(openModalParam: OpenModalImplParam<MC>) => void;
 /**
  * TODO: Find a better alternative to using any
  */
 // export type OpenModal = <MC extends ModalComponent<{ [key: string]: any }[0]>>(
 export type OpenModal = <MC extends ModalComponent<any>>(openModalParam: OpenModalParam<MC>) => void;
 
-interface ModalInfoManageMapState extends Omit<OpenedModalState, 'modalRef' | 'modalProps'> {
+interface ModalInfoManageMapState extends Omit<OpenedModalState, 'modalRef' | 'modalProps'>, ModalCallback {
   modalRef: HTMLElement;
 }
+export type ModalInfoManageMap = Map<StringifiedModalKey, ModalInfoManageMapState>;
 
 type WatchParam = { modalKey: ModalKey | StringifiedModalKey };
+interface WatchImplParam extends WatchParam {
+  modalInfoManageMap: ModalInfoManageMap;
+}
+export type WatchImpl = (watchImplParam: WatchImplParam) => ReturnType<Watch>;
 export type Watch = (watchParam: WatchParam) => ModalInfoManageMapState | undefined;
-
-export type ModalInfoManageMap = Map<StringifiedModalKey, ModalInfoManageMapState>;
 
 /**
  * TODO: The `current` property should have both getter and setter types defined.
@@ -122,18 +132,49 @@ export type ModalInfoManageMap = Map<StringifiedModalKey, ModalInfoManageMapStat
 export interface ModalRef extends RefCallback<HTMLElement> {
   current: ReturnType<Watch>;
 }
-type SetModalRefParam = {
+interface GenerateModalRefParam extends ModalCallback {
   ModalComponent: ModalComponent;
   modalKey: ModalKey;
   options?: OpenModalOptions;
-  randomUniqueKey: OpenedModalState['randomUniqueKey'];
-};
-export type SetModalRef = (setModalRefParam: SetModalRefParam) => ModalRef;
+  internalUniqueKey: OpenedModalState['internalUniqueKey'];
+  modalInfoManageMap: ModalInfoManageMap;
+}
+
+export type GenerateModalRef = (generateModalRefParam: GenerateModalRefParam) => ModalRef;
 
 type CloseModalParam = { modalKey: ModalKey | StringifiedModalKey };
+interface CloseModalImplParam extends CloseModalParam {
+  modalInfoManageMap: ModalInfoManageMap;
+  setOpenedModalList: SetOpenedModalList;
+}
+
+interface CloseModalImplReturn extends Promise<ModalCallback> {}
+export type CloseModalImpl = (closeModalImplParam: CloseModalImplParam) => CloseModalImplReturn;
 export type CloseModal = (closeModalParam: CloseModalParam) => Promise<void>;
 
+interface HandleCloseModalParam {
+  modalKey: ModalKey;
+  modalInfoManageMap: ModalInfoManageMap;
+  setOpenedModalList: SetOpenedModalList;
+}
+export type HandleCloseModal = (handleCloseModalParam: HandleCloseModalParam) => () => Promise<void>;
+
+interface HandleSubmitModalParam extends HandleCloseModalParam {}
+export type HandleSubmitModal = (
+  handleSubmitModalParam: HandleSubmitModalParam,
+) => (e?: React.BaseSyntheticEvent) => Promise<void>;
+
+type DestroyImplParam = {
+  modalInfoManageMap: ModalInfoManageMap;
+  setOpenedModalList: SetOpenedModalList;
+};
+export type DestroyImpl = (destroyImplParam: DestroyImplParam) => ReturnType<Destroy>;
 export type Destroy = () => Promise<void>;
+
+/**
+ * changeModalCountLimit will not destroy any currently open modals.
+ * It will only affect the limit of the number of modals that can be opened.
+ */
 export type ChangeModalCountLimit = (newLimits: number) => void;
 
 export interface UseModalListParam {

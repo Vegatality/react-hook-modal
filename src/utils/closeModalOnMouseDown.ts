@@ -1,11 +1,11 @@
 import { CloseModal, ModalInfoManageMap } from '../interface';
 
-interface SetCloseOnMouseDownPraram {
+interface SetCloseOnMouseDownParam {
   modalInfoManageMap: ModalInfoManageMap;
   closeWithModalKeyImpl: CloseModal;
 }
 
-export const setCloseOnMouseDown = ({ modalInfoManageMap, closeWithModalKeyImpl }: SetCloseOnMouseDownPraram) => {
+export const setCloseOnMouseDown = ({ modalInfoManageMap, closeWithModalKeyImpl }: SetCloseOnMouseDownParam) => {
   const closeOnMouseDown = (e: MouseEvent) => {
     if (modalInfoManageMap.size === 0) {
       return;
