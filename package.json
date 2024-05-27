@@ -1,6 +1,6 @@
 {
   "name": "@vegatality/react-hook-modal",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "type": "module",
   "private": false,
   "description": "A simple modal hook for React",
