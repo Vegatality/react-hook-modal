@@ -115,7 +115,7 @@ export type OpenModalImpl = <MC extends ModalComponent<any>>(openModalParam: Ope
 export type OpenModal = <MC extends ModalComponent<any>>(openModalParam: OpenModalParam<MC>) => void;
 
 interface ModalInfoManageMapState extends Omit<OpenedModalState, 'modalRef' | 'modalProps'>, ModalCallback {
-  modalRef: HTMLElement;
+  modalRef: HTMLElement | null;
 }
 export type ModalInfoManageMap = Map<StringifiedModalKey, ModalInfoManageMapState>;
 

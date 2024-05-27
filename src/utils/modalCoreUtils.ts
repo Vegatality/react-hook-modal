@@ -35,21 +35,30 @@ const generateModalRef: GenerateModalRef = ({
   onSubmit,
 }) => {
   const stringifiedModalKey: StringifiedModalKey = JSON.stringify(modalKey);
+  const optionsRemappedWithDefaultValue: OpenedModalState['options'] = options
+    ? { scrollable: false, ...options } // override default values with the options passed
+    : options;
+  modalInfoManageMap.set(stringifiedModalKey, {
+    modalKey: stringifiedModalKey,
+    ModalComponent,
+    options: optionsRemappedWithDefaultValue,
+    modalRef: null,
+    internalUniqueKey,
+    onClose,
+    onSubmit,
+  });
 
   const modalRef: RefCallback<HTMLElement> = <T extends HTMLElement | null>(node: T) => {
     if (node) {
-      const optionsRemappedWithDefaultValue: OpenedModalState['options'] = options
-        ? { scrollable: false, ...options } // override default values with the options passed
-        : options;
-      modalInfoManageMap.set(stringifiedModalKey, {
-        modalKey: stringifiedModalKey,
-        ModalComponent,
-        options: optionsRemappedWithDefaultValue,
-        modalRef: node,
-        internalUniqueKey,
-        onClose,
-        onSubmit,
-      });
+      const modalInfo = modalInfoManageMap.get(stringifiedModalKey);
+
+      if (modalInfo) {
+        modalInfo.modalRef = node;
+      } else {
+        console.error(
+          `Failed to set a modal ref with key: ${stringifiedModalKey}.\nThis error occurs because the modal has already been removed or the modal key is invalid.\nPlease check your modal key.\nBtw, this error is not critical and will not stop the application.`,
+        );
+      }
     }
   };
 

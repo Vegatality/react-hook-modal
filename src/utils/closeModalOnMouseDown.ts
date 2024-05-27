@@ -34,6 +34,12 @@ export const setCloseOnMouseDown = ({ modalInfoManageMap, closeWithModalKeyImpl 
         closeWithModalKeyImpl({ modalKey });
         return;
       }
+
+      // do not close a modal of which resistBackgroundClick option is set to false but modalRef is not exist
+      // because we cannot determine the boundary of a modal without modalRef.
+      if (!options?.resistBackgroundClick && !modalRef) {
+        return;
+      }
     }
   };
 
