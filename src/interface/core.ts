@@ -184,9 +184,9 @@ export type Destroy = () => Promise<void>;
 export type ChangeModalCountLimit = (newLimits: number) => void;
 
 export interface DefaultMode extends OpenModalOptions {
-  resistBackgroundClick: boolean;
-  resistESC: boolean;
-  scrollable: boolean;
+  resistBackgroundClick?: boolean;
+  resistESC?: boolean;
+  scrollable?: boolean;
 }
 export interface UseModalListOptions {
   modalCountLimit?: number;
