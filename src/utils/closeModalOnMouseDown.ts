@@ -16,7 +16,7 @@ export const setCloseOnMouseDown = ({ modalInfoManageMap, closeWithModalKeyImpl 
       const { options, modalRef } = modalInfoManageMap.get(modalKey) || {};
 
       if (modalKey.length === 0) {
-        continue;
+        throw new Error('modalKey is empty');
       }
 
       if (

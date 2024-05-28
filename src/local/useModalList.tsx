@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react';
 import { useCloseModalOnEventFire } from '../hooks/useCloseModalOnEventFire';
 import { useResistScrollingDim } from '../hooks/useResistScrollingDim';
+import { useWatch } from '../hooks/useWatch';
 import {
   ChangeModalCountLimit,
   CloseModal,
@@ -13,7 +14,7 @@ import {
   UseModalList,
   Watch,
 } from '../interface';
-import { closeModalImpl, destroyModalImpl, openModalImpl, watchModalImpl } from '../utils/modalCoreUtils';
+import { closeModalImpl, destroyModalImpl, openModalImpl } from '../utils/modalCoreUtils';
 
 export const useModalList: UseModalList = (useModalListParam = {}) => {
   const { modalCountLimit } = useModalListParam;
@@ -21,8 +22,7 @@ export const useModalList: UseModalList = (useModalListParam = {}) => {
   const modalInfoManageMapRef = useRef<ModalInfoManageMap>(new Map());
   const [openedModalList, setOpenedModalList] = useState<OpenedModalState[]>([]);
 
-  const watch: Watch = ({ modalKey }) =>
-    watchModalImpl({ modalKey, modalInfoManageMap: modalInfoManageMapRef.current });
+  const watch: Watch = useWatch({ modalInfoManageMapRefCurrent: modalInfoManageMapRef.current, openedModalList });
 
   const destroy: Destroy = async () =>
     destroyModalImpl({ modalInfoManageMap: modalInfoManageMapRef.current, setOpenedModalList });

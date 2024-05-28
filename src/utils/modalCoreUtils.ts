@@ -29,7 +29,6 @@ const generateModalRef: GenerateModalRef = ({
   ModalComponent,
   modalInfoManageMap,
   modalKey,
-  internalUniqueKey,
   options,
   onClose,
   onSubmit,
@@ -43,7 +42,6 @@ const generateModalRef: GenerateModalRef = ({
     ModalComponent,
     options: optionsRemappedWithDefaultValue,
     modalRef: null,
-    internalUniqueKey,
     onClose,
     onSubmit,
   });
@@ -145,13 +143,10 @@ export const openModalImpl: OpenModalImpl = ({
     throw new Error('The modal key must not be empty and must not contain an empty string.');
   }
 
-  const internalUniqueKey = generateKey();
-  const stringifiedModalKey: StringifiedModalKey = JSON.stringify(modalKey);
   const modalRef: ReturnType<GenerateModalRef> = generateModalRef({
     ModalComponent,
     modalKey,
     options,
-    internalUniqueKey,
     onClose: modalProps.onClose,
     onSubmit: modalProps.onSubmit,
     modalInfoManageMap,
@@ -160,8 +155,8 @@ export const openModalImpl: OpenModalImpl = ({
   setOpenedModalList((prev) => [
     ...prev,
     {
-      modalKey: stringifiedModalKey,
-      internalUniqueKey,
+      modalKey: JSON.stringify(modalKey),
+      internalUniqueKey: generateKey(),
       modalRef,
       modalProps: {
         ...modalProps,

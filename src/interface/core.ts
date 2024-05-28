@@ -114,7 +114,9 @@ export type OpenModalImpl = <MC extends ModalComponent<any>>(openModalParam: Ope
 // export type OpenModal = <MC extends ModalComponent<{ [key: string]: any }[0]>>(
 export type OpenModal = <MC extends ModalComponent<any>>(openModalParam: OpenModalParam<MC>) => void;
 
-interface ModalInfoManageMapState extends Omit<OpenedModalState, 'modalRef' | 'modalProps'>, ModalCallback {
+interface ModalInfoManageMapState
+  extends Omit<OpenedModalState, 'modalRef' | 'modalProps' | 'internalUniqueKey'>,
+    ModalCallback {
   modalRef: HTMLElement | null;
 }
 export type ModalInfoManageMap = Map<StringifiedModalKey, ModalInfoManageMapState>;
@@ -136,13 +138,17 @@ interface GenerateModalRefParam extends ModalCallback {
   ModalComponent: ModalComponent;
   modalKey: ModalKey;
   options?: OpenModalOptions;
-  internalUniqueKey: OpenedModalState['internalUniqueKey'];
   modalInfoManageMap: ModalInfoManageMap;
 }
 
 export type GenerateModalRef = (generateModalRefParam: GenerateModalRefParam) => ModalRef;
 
-type CloseModalParam = { modalKey: ModalKey | StringifiedModalKey };
+type CloseModalParam = {
+  /**
+   * modalKey should be a string array or a stringified modal key.
+   */
+  modalKey: ModalKey | StringifiedModalKey;
+};
 interface CloseModalImplParam extends CloseModalParam {
   modalInfoManageMap: ModalInfoManageMap;
   setOpenedModalList: SetOpenedModalList;

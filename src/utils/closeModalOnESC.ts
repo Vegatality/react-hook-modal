@@ -16,7 +16,7 @@ export const setCloseOnESC = ({ modalInfoManageMap, closeWithModalKeyImpl }: Set
       const { options } = modalInfoManageMap.get(modalKey) || {};
 
       if (modalKey.length === 0) {
-        continue;
+        throw new Error('modalKey is empty');
       }
 
       if (
