@@ -3,8 +3,8 @@
 import { DependencyList, useEffect } from 'react';
 
 import { CloseModal, ModalInfoManageMap } from '../interface';
-import { setCloseOnMouseDown } from '../utils/closeModalOnMouseDown';
 import { setCloseOnESC } from '../utils/closeModalOnESC';
+import { setCloseOnMouseDown } from '../utils/closeModalOnMouseDown';
 
 interface UseCloseModalOnMouseDownParam {
   modalInfoManageMap: ModalInfoManageMap;
@@ -18,7 +18,10 @@ export const useCloseModalOnEventFire = ({
   dependencyList = [],
 }: UseCloseModalOnMouseDownParam) => {
   useEffect(() => {
-    const closeOnMouseDown = setCloseOnMouseDown({ modalInfoManageMap, closeWithModalKeyImpl });
+    const closeOnMouseDown = setCloseOnMouseDown({
+      modalInfoManageMap,
+      closeWithModalKeyImpl,
+    });
     const closeOnESC = setCloseOnESC({ modalInfoManageMap, closeWithModalKeyImpl });
 
     document.addEventListener('mousedown', closeOnMouseDown);

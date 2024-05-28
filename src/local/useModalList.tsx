@@ -16,9 +16,8 @@ import {
 } from '../interface';
 import { closeModalImpl, destroyModalImpl, openModalImpl } from '../utils/modalCoreUtils';
 
-export const useModalList: UseModalList = (useModalListParam = {}) => {
-  const { modalCountLimit } = useModalListParam;
-  const initialLimitsRef = useRef<number | null>(modalCountLimit ?? null);
+export const useModalList: UseModalList = (useModalListOptions = {}) => {
+  const initialLimitsRef = useRef<number | null>(useModalListOptions.modalCountLimit ?? null);
   const modalInfoManageMapRef = useRef<ModalInfoManageMap>(new Map());
   const [openedModalList, setOpenedModalList] = useState<OpenedModalState[]>([]);
 
@@ -43,13 +42,14 @@ export const useModalList: UseModalList = (useModalListParam = {}) => {
     }
   };
 
-  const openModal: OpenModal = (openModalParam) => {
+  const openModal: OpenModal = ({ options, ...restOpenModalParam }) => {
     openModalImpl({
       modalCountLimit: initialLimitsRef.current,
       modalInfoManageMap: modalInfoManageMapRef.current,
       openedModalList,
       setOpenedModalList,
-      ...openModalParam,
+      options: { ...useModalListOptions.mode, ...options },
+      ...restOpenModalParam,
     });
   };
 
@@ -67,7 +67,10 @@ export const useModalList: UseModalList = (useModalListParam = {}) => {
   };
 
   // options
-  useCloseModalOnEventFire({ modalInfoManageMap: modalInfoManageMapRef.current, closeWithModalKeyImpl: closeModal });
+  useCloseModalOnEventFire({
+    modalInfoManageMap: modalInfoManageMapRef.current,
+    closeWithModalKeyImpl: closeModal,
+  });
   useResistScrollingDim({ modalInfoManageMap: modalInfoManageMapRef.current, dependencyList: [openedModalList] });
 
   return { watch, destroy, changeModalCountLimit, openModal, closeModal, ModalComponentList };

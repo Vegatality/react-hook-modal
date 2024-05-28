@@ -183,8 +183,14 @@ export type Destroy = () => Promise<void>;
  */
 export type ChangeModalCountLimit = (newLimits: number) => void;
 
-export interface UseModalListParam {
+export interface DefaultMode extends OpenModalOptions {
+  resistBackgroundClick: boolean;
+  resistESC: boolean;
+  scrollable: boolean;
+}
+export interface UseModalListOptions {
   modalCountLimit?: number;
+  mode?: DefaultMode;
 }
 export interface UseModalListReturn {
   watch: Watch;
@@ -194,4 +200,4 @@ export interface UseModalListReturn {
   closeModal: CloseModal;
   ModalComponentList: () => JSX.Element[];
 }
-export type UseModalList = (useModalListParam?: UseModalListParam) => UseModalListReturn;
+export type UseModalList = (useModalListParam?: UseModalListOptions) => UseModalListReturn;

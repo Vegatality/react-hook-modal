@@ -5,7 +5,7 @@ import {
   Destroy,
   OpenModal,
   OpenedModalState,
-  UseModalListParam,
+  UseModalListOptions,
   Watch,
 } from './core';
 
@@ -19,4 +19,4 @@ export interface IGlobalModalListDispatchContext {
 
 export interface IGlobalModalListStateContext extends OpenedModalState {}
 
-export interface GlobalModalListProviderProps extends PropsWithChildren<UseModalListParam> {}
+export interface GlobalModalListProviderProps extends PropsWithChildren<UseModalListOptions> {}

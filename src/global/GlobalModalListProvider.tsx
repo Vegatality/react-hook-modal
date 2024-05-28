@@ -17,7 +17,7 @@ import {
 import { closeModalImpl, destroyModalImpl, openModalImpl, watchModalImpl } from '../utils/modalCoreUtils';
 import { GlobalModalListDispatchContext, GlobalModalListStateContext } from './useGlobalModalListDispatch';
 
-export const GlobalModalListProvider = ({ children, modalCountLimit }: GlobalModalListProviderProps) => {
+export const GlobalModalListProvider = ({ children, modalCountLimit, mode }: GlobalModalListProviderProps) => {
   const initialLimitsRef = useRef<number | null>(modalCountLimit ?? null);
   const globalModalInfoManageMapRef = useRef<ModalInfoManageMap>(new Map());
   const [openedGlobalModalList, setOpenedGlobalModalList] = useState<OpenedModalState[]>([]);
@@ -47,13 +47,14 @@ export const GlobalModalListProvider = ({ children, modalCountLimit }: GlobalMod
     }
   };
 
-  const openGlobalModal: OpenModal = (openModalParam) => {
+  const openGlobalModal: OpenModal = ({ options, ...restOpenGlobalModalParam }) => {
     openModalImpl({
       modalCountLimit: initialLimitsRef.current,
       modalInfoManageMap: globalModalInfoManageMapRef.current,
       openedModalList: openedGlobalModalList,
       setOpenedModalList: setOpenedGlobalModalList,
-      ...openModalParam,
+      options: { ...mode, ...options },
+      ...restOpenGlobalModalParam,
     });
   };
 

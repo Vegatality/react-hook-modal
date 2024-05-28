@@ -1,7 +1,8 @@
-import { CloseModal, ModalInfoManageMap } from '../interface';
+import { CloseModal, DefaultMode, ModalInfoManageMap } from '../interface';
 
 interface SetCloseOnMouseDownParam {
   modalInfoManageMap: ModalInfoManageMap;
+  defaultResistBackgroundClick?: DefaultMode['resistBackgroundClick'];
   closeWithModalKeyImpl: CloseModal;
 }
 
