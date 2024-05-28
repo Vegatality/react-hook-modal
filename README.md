@@ -17,6 +17,7 @@ It is a custom hook that allows you to create a modal with a simple API.
     - [Default Closing Modal Order with Options](#4-1-default-closing-modal-order-with-options)
     - [Handling Modals with Options](#4-2-handling-modals-with-options)
     - [Resist other modals](#4-3-resist-other-modals)
+    - [Default Modal Options](#4-4-default-modal-options)
   - [Pass `modalRef` Prop](#5-pass-modalref-prop)
   - [`useToggleModal` Hook](#6-usetogglemodal-hook)
 - [Types](#types)
@@ -307,6 +308,50 @@ const App = () => {
       </button>
       <button onClick={() => openModal({ modalKey: ['some2'], ModalComponent: SomeModal2, props: { name: 'some2' }, options: { resistBackgroundClick: ['some'] } })}> /* 👈 this will resist background click until 'some' modal is closed */
         Open Modal 2
+      </button>
+    </div>
+  );
+};
+```
+
+</details>
+
+<br />
+
+#### 4-4. Default Modal Options
+
+You can set the default options for all modals.<br />
+These default options are applied to all modals that are opened without specifying their own options.<br />
+However, the options specified when opening each modal will override the default options.
+
+<details>
+<summary>View</summary>
+
+```tsx
+import { useModalList, type ModalComponent } from '@vegatality/react-hook-modal';
+
+const SomeModal: ModalComponent<{ name: string }> = ({ closeModal, modalRef, name }) => {
+  return (
+    <div ref={modalRef}>
+      <h1>Some Modal</h1>
+      <p>{name}</p>
+      <button onClick={closeModal}>Close</button>
+    </div>
+  );
+};
+
+const App = () => {
+  const { ModalComponentList, openModal, closeModal, watch, destroy, ... } = useModalList({
+    mode: {
+      resistBackgroundClick: true, // default option
+    }
+  });
+
+  return (
+    <div>
+      <ModalComponentList />
+      <button onClick={() => openModal({ modalKey: ['some'], ModalComponent: SomeModal, props: { name: 'some' }, options: { resistBackgroundClick: false } })}> /* 👈 this will override default option */
+        Open Modal 1
       </button>
     </div>
   );
