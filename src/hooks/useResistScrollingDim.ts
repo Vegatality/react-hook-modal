@@ -19,13 +19,9 @@ export const useResistScrollingDim = ({ modalInfoManageMap, dependencyList = [] 
       return;
     }
 
-    // Iterate through modalInfoManageMap, and if there isn't at least one modal where scrollable option  (default is false) is false, do not set fixed position.
-    // If there is at least one modal with scrollable set to false, set fixed position.
-    if (
-      !Array.from(modalInfoManageMap.values()).some(
-        (managedModalInfo) => managedModalInfo.options?.scrollable === false,
-      )
-    ) {
+    // Iterate through modalInfoManageMap, and if there isn't at least one modal where scrollable option (default is false) is false, do not set fixed position.
+    // In contrast, in other words, If there is at least one modal with scrollable set to false or undefined, it means that a fixed position will be applied.
+    if (!Array.from(modalInfoManageMap.values()).some((managedModalInfo) => !managedModalInfo.options?.scrollable)) {
       return;
     }
 

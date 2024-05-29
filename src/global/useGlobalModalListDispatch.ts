@@ -1,3 +1,5 @@
+'use client';
+
 import { createContext, useContext } from 'react';
 import { IGlobalModalListDispatchContext, IGlobalModalListStateContext } from '../interface';
 
@@ -16,12 +18,6 @@ export const useGlobalModalListDispatch = () => {
 
 export const useGlobalModalListState = () => {
   const context = useContext(GlobalModalListStateContext);
-
-  if (context.length === 0) {
-    console.warn(
-      'You can see this warning if there is no opened modal.\nuseGlobalModalListState should be within GlobalModalListProvider',
-    );
-  }
 
   return context;
 };

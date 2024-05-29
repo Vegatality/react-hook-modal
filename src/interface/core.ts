@@ -200,4 +200,4 @@ export interface UseModalListReturn {
   closeModal: CloseModal;
   ModalComponentList: () => JSX.Element[];
 }
-export type UseModalList = (useModalListParam?: UseModalListOptions) => UseModalListReturn;
+export type UseModalList = (useModalListOptions?: UseModalListOptions) => UseModalListReturn;

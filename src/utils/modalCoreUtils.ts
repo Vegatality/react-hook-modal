@@ -8,7 +8,6 @@ import {
   ModalCallback,
   ModalRef,
   OpenModalImpl,
-  OpenedModalState,
   StringifiedModalKey,
   WatchImpl,
 } from '../interface';
@@ -34,13 +33,10 @@ const generateModalRef: GenerateModalRef = ({
   onSubmit,
 }) => {
   const stringifiedModalKey: StringifiedModalKey = JSON.stringify(modalKey);
-  const optionsRemappedWithDefaultValue: OpenedModalState['options'] = options
-    ? { scrollable: false, ...options } // override default values with the options passed
-    : options;
   modalInfoManageMap.set(stringifiedModalKey, {
     modalKey: stringifiedModalKey,
     ModalComponent,
-    options: optionsRemappedWithDefaultValue,
+    options,
     modalRef: null,
     onClose,
     onSubmit,
