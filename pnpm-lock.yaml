@@ -44,9 +44,6 @@ importers:
       react-dom:
         specifier: ^18.2.0
         version: 18.3.1(react@18.3.1)
-      rollup-plugin-preserve-directives:
-        specifier: ^0.4.0
-        version: 0.4.0(rollup@4.17.2)
       typescript:
         specifier: ^5.2.2
         version: 5.4.5
@@ -1164,11 +1161,6 @@ packages:
   rimraf@3.0.2:
     resolution: {integrity: sha512-JZkJMZkAGFFPP2YqXZXPbMlMBgsxzE8ILs4lMIX/2o0L9UBw9O/Y3o6wFw/i9YLapcUJWwqbi3kdxIPdC62TIA==}
     hasBin: true
-
-  rollup-plugin-preserve-directives@0.4.0:
-    resolution: {integrity: sha512-gx4nBxYm5BysmEQS+e2tAMrtFxrGvk+Pe5ppafRibQi0zlW7VYAbEGk6IKDw9sJGPdFWgVTE0o4BU4cdG0Fylg==}
-    peerDependencies:
-      rollup: 2.x || 3.x || 4.x
 
   rollup@4.17.2:
     resolution: {integrity: sha512-/9ClTJPByC0U4zNLowV1tMBe8yMEAxewtR3cUNX5BoEpGH3dQEWpJLr6CLp0fPdYRF/fzVOgvDb1zXuakwF5kQ==}
@@ -2510,12 +2502,6 @@ snapshots:
   rimraf@3.0.2:
     dependencies:
       glob: 7.2.3
-
-  rollup-plugin-preserve-directives@0.4.0(rollup@4.17.2):
-    dependencies:
-      '@rollup/pluginutils': 5.1.0(rollup@4.17.2)
-      magic-string: 0.30.10
-      rollup: 4.17.2
 
   rollup@4.17.2:
     dependencies:
