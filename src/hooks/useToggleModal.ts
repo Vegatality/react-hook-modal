@@ -54,7 +54,7 @@ interface UseToggleModalReturn<T extends HTMLElement> {
  * @example
  * ```tsx
  * function App () {
- *  const { isModalOpen, modalRef, toggleModal } = useToggleModal<HTMLDivElement>(false, { resistOnBackgroundClick: true });
+ *  const { isModalOpen, modalRef, toggleModal } = useToggleModal<HTMLDivElement>(false, { resistBackgroundClick: true });
  *  return (
  *    <div>
  *      <button onClick={toggleModal}>Toggle Modal</button>
