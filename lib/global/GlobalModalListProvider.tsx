@@ -3,7 +3,6 @@
 import { useMemo, useRef, useState } from 'react';
 import { useCloseModalOnEventFire } from '../hooks/useCloseModalOnEventFire';
 import { useResistScrollingDim } from '../hooks/useResistScrollingDim';
-import { useWatch } from '../hooks/useWatch';
 import {
   ChangeModalCountLimit,
   CloseModal,
@@ -15,7 +14,7 @@ import {
   OpenedModalState,
   Watch,
 } from '../interface';
-import { closeModalImpl, destroyModalImpl, openModalImpl } from '../utils/modalCoreUtils';
+import { closeModalImpl, destroyModalImpl, openModalImpl, watchModalImpl } from '../utils/modalCoreUtils';
 import { GlobalModalListDispatchContext, GlobalModalListStateContext } from './useGlobalModalListDispatch';
 
 export const GlobalModalListProvider = ({ children, modalCountLimit, mode }: GlobalModalListProviderProps) => {
@@ -23,10 +22,8 @@ export const GlobalModalListProvider = ({ children, modalCountLimit, mode }: Glo
   const globalModalInfoManageMapRef = useRef<ModalInfoManageMap>(new Map());
   const [openedGlobalModalList, setOpenedGlobalModalList] = useState<OpenedModalState[]>([]);
 
-  const watchGlobalModal: Watch = useWatch({
-    modalInfoManageMapRefCurrent: globalModalInfoManageMapRef.current,
-    openedModalList: openedGlobalModalList,
-  });
+  const watchGlobalModal: Watch = ({ modalKey }) =>
+    watchModalImpl({ modalKey, modalInfoManageMap: globalModalInfoManageMapRef.current });
 
   const destroyGlobalModal: Destroy = async () =>
     destroyModalImpl({
@@ -69,7 +66,7 @@ export const GlobalModalListProvider = ({ children, modalCountLimit, mode }: Glo
       watchGlobalModal,
       changeGlobalModalCountLimit,
     }),
-    [],
+    [openedGlobalModalList],
   );
 
   // options

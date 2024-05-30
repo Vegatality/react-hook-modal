@@ -345,7 +345,7 @@ const SomeModal: ModalComponent<{ name: string }> = ({ closeModal, modalRef, nam
 const App = () => {
   const { ModalComponentList, openModal, closeModal, watch, destroy, ... } = useModalList({
     mode: {
-      resistBackgroundClick: true, // default option
+      resistBackgroundClick: true, // set default option
     }
   });
 
