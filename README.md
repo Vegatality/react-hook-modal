@@ -66,7 +66,7 @@ const App = () => {
   return (
     <div>
       <ModalComponentList />
-      <button onClick={() => openModal({ modalKey: ['some'], ModalComponent: SomeModal, props: { name: 'some' }, options: { resistBackgroundClick: true } })}>
+      <button onClick={() => openModal({ modalKey: ['some'], ModalComponent: SomeModal, modalProps: { name: 'some' }, options: { resistBackgroundClick: true } })}>
         Open Modal 1
       </button>
     </div>
@@ -98,7 +98,7 @@ const ChildComponent = () => {
   const { openModal } = useModalContext();
 
   return (
-    <button onClick={() => openModal({ modalKey: ['some'], ModalComponent: SomeModal, props: { name: 'some' } })}>
+    <button onClick={() => openModal({ modalKey: ['some'], ModalComponent: SomeModal, modalProps: { name: 'some' } })}>
       Open Modal 1
     </button>
   );
@@ -149,7 +149,9 @@ const App = () => {
   const { openGlobalModal } = useGlobalModalList(); // useGlobalModalList hook uses useContext hook under the hood
 
   return (
-    <button onClick={() => openGlobalModal({ modalKey: ['some'], ModalComponent: SomeModal, props: { name: 'some' } })}>
+    <button
+      onClick={() => openGlobalModal({ modalKey: ['some'], ModalComponent: SomeModal, modalProps: { name: 'some' } })}
+    >
       Open Modal 1
     </button>
   );
@@ -205,10 +207,10 @@ const App = () => {
   return (
     <div>
       <ModalComponentList />
-      <button onClick={() => openModal({ modalKey: ['some'], ModalComponent: SomeModal, props: { name: 'some' }, options: { resistBackgroundClick: true } })}>
+      <button onClick={() => openModal({ modalKey: ['some'], ModalComponent: SomeModal, modalProps: { name: 'some' }, options: { resistBackgroundClick: true } })}>
         Open Modal 1
       </button>
-      <button onClick={() => openModal({ modalKey: ['some2'], ModalComponent: SomeModal2, props: { name: 'some2' }, options: { resistBackgroundClick: false, scrollable: false } })}>
+      <button onClick={() => openModal({ modalKey: ['some2'], ModalComponent: SomeModal2, modalProps: { name: 'some2' }, options: { resistBackgroundClick: false, scrollable: false } })}>
         Open Modal 2
       </button>
     </div>
@@ -303,10 +305,10 @@ const App = () => {
   return (
     <div>
       <ModalComponentList />
-      <button onClick={() => openModal({ modalKey: ['some'], ModalComponent: SomeModal, props: { name: 'some' }, options: { resistBackgroundClick: true } })}>
+      <button onClick={() => openModal({ modalKey: ['some'], ModalComponent: SomeModal, modalProps: { name: 'some' }, options: { resistBackgroundClick: true } })}>
         Open Modal 1
       </button>
-      <button onClick={() => openModal({ modalKey: ['some2'], ModalComponent: SomeModal2, props: { name: 'some2' }, options: { resistBackgroundClick: ['some'] } })}> /* 👈 this will resist background click until 'some' modal is closed */
+      <button onClick={() => openModal({ modalKey: ['some2'], ModalComponent: SomeModal2, modalProps: { name: 'some2' }, options: { resistBackgroundClick: ['some'] } })}> /* 👈 this will resist background click until 'some' modal is closed */
         Open Modal 2
       </button>
     </div>
@@ -350,7 +352,7 @@ const App = () => {
   return (
     <div>
       <ModalComponentList />
-      <button onClick={() => openModal({ modalKey: ['some'], ModalComponent: SomeModal, props: { name: 'some' }, options: { resistBackgroundClick: false } })}> /* 👈 this will override default option */
+      <button onClick={() => openModal({ modalKey: ['some'], ModalComponent: SomeModal, modalProps: { name: 'some' }, options: { resistBackgroundClick: false } })}> /* 👈 this will override default option */
         Open Modal 1
       </button>
     </div>
@@ -495,10 +497,10 @@ const App = () => {
   return (
     <div>
       <ModalComponentList />
-      <button onClick={() => openModal({ modalKey: ['some'], ModalComponent: SomeModal, props: { name: 'some' }, options: { resistBackgroundClick: true } })}>
+      <button onClick={() => openModal({ modalKey: ['some'], ModalComponent: SomeModal, modalProps: { name: 'some' }, options: { resistBackgroundClick: true } })}>
         Open Modal 1
       </button>
-      <button onClick={() => openModal({ modalKey: ['some2'], ModalComponent: SomeModal2, props: { name: 'some2' }, options: { resistBackgroundClick: false, scrollable: false } })}>
+      <button onClick={() => openModal({ modalKey: ['some2'], ModalComponent: SomeModal2, modalProps: { name: 'some2' }, options: { resistBackgroundClick: false, scrollable: false } })}>
         Open Modal 2
       </button>
       <button onClick={() => closeModal({ modalKey: ['some2'] })}>Close Modal 2</button>
