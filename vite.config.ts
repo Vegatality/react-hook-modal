@@ -5,6 +5,7 @@ import { extname, relative, resolve } from 'path';
 import { defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
 import tsconfigPaths from 'vite-tsconfig-paths';
+import preserveDirectives from 'rollup-plugin-preserve-directives';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -33,6 +34,7 @@ export default defineConfig({
           ]),
       ),
       output: {
+        preserveModules: true,
         globals: {
           react: 'React',
           'react-dom': 'ReactDOM',
@@ -40,6 +42,7 @@ export default defineConfig({
         // assetFileNames: 'assets/[name][extname]',
         entryFileNames: '[name].js',
       },
+      plugins: [preserveDirectives()],
       // @see https://github.com/vitejs/vite/issues/15012#issuecomment-1948550039
       onwarn(warning, defaultHandler) {
         if (warning.code === 'SOURCEMAP_ERROR') {
