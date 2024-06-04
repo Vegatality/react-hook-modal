@@ -1,5 +1,3 @@
-'use client';
-
 export * from './local';
 
 export * from './global';

@@ -1,77 +1,28 @@
 'use client';
 
-import { useRef, useState } from 'react';
 import { useCloseModalOnEventFire } from '../hooks/useCloseModalOnEventFire';
+import { useGenerateModalAPI } from '../hooks/useGenerateModalAPI';
 import { useResistScrollingDim } from '../hooks/useResistScrollingDim';
-import {
-  ChangeModalCountLimit,
-  CloseModal,
-  Destroy,
-  ModalInfoManageMap,
-  OpenModal,
-  OpenedModalState,
-  UseModalList,
-  Watch,
-} from '../interface';
-import { closeModalImpl, destroyModalImpl, openModalImpl, watchModalImpl } from '../utils/modalCoreUtils';
+import { UseModalList } from '../interface';
 
 export const useModalList: UseModalList = (useModalListOptions = {}) => {
-  const initialLimitsRef = useRef<number | null>(useModalListOptions.modalCountLimit ?? null);
-  const modalInfoManageMapRef = useRef<ModalInfoManageMap>(new Map());
-  const [openedModalList, setOpenedModalList] = useState<OpenedModalState[]>([]);
-
-  const watch: Watch = ({ modalKey }) =>
-    watchModalImpl({ modalKey, modalInfoManageMap: modalInfoManageMapRef.current });
-
-  const destroy: Destroy = async () =>
-    destroyModalImpl({ modalInfoManageMap: modalInfoManageMapRef.current, setOpenedModalList });
-
-  const changeModalCountLimit: ChangeModalCountLimit = (newLimits) => {
-    initialLimitsRef.current = newLimits;
-  };
-
-  const closeModal: CloseModal = async ({ modalKey }) => {
-    const { onClose } = await closeModalImpl({
-      modalKey,
-      modalInfoManageMap: modalInfoManageMapRef.current,
-      setOpenedModalList,
+  const { changeModalCountLimit, closeModal, destroy, modalInfoManageMap, openModal, openedModalList, watch } =
+    useGenerateModalAPI({
+      modalCountLimit: useModalListOptions.modalCountLimit,
+      mode: useModalListOptions.mode,
     });
-
-    if (typeof onClose === 'function') {
-      onClose();
-    }
-  };
-
-  const openModal: OpenModal = ({ options, ...restOpenModalParam }) => {
-    openModalImpl({
-      modalCountLimit: initialLimitsRef.current,
-      modalInfoManageMap: modalInfoManageMapRef.current,
-      openedModalList,
-      setOpenedModalList,
-      options: { ...useModalListOptions.mode, ...options },
-      ...restOpenModalParam,
-    });
-  };
 
   const ModalComponentList = () => {
     return openedModalList.map(({ modalKey, modalRef, modalProps, ModalComponent, internalUniqueKey }) => {
-      return (
-        <ModalComponent
-          key={internalUniqueKey}
-          {...modalProps}
-          stringifiedCurrentModalKey={modalKey}
-          modalRef={modalRef}
-        />
-      );
+      return <ModalComponent key={internalUniqueKey} {...modalProps} currentModalKey={modalKey} modalRef={modalRef} />;
     });
   };
 
-  // options
   useCloseModalOnEventFire({
-    modalInfoManageMap: modalInfoManageMapRef.current,
-    closeWithModalKeyImpl: closeModal,
+    modalInfoManageMap,
+    closeModal,
   });
-  useResistScrollingDim({ modalInfoManageMap: modalInfoManageMapRef.current, dependencyList: [openedModalList] });
+  useResistScrollingDim({ modalInfoManageMap, dependencyList: [openedModalList] });
 
   return { watch, destroy, changeModalCountLimit, openModal, closeModal, ModalComponentList };
 };

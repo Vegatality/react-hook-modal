@@ -1,22 +1,33 @@
 import { RefCallback } from 'react';
 import {
+  ChangeModalCountLimit,
+  CloseModal,
   CloseModalImpl,
+  Destroy,
   DestroyImpl,
+  GenerateModalAPI,
+  GenerateModalAPIReturn,
   GenerateModalRef,
   HandleCloseModal,
   HandleSubmitModal,
+  HashedModalKey,
   ModalCallback,
   ModalRef,
+  OpenModal,
   OpenModalImpl,
-  StringifiedModalKey,
+  Watch,
   WatchImpl,
 } from '../interface';
 import { generateKey } from './generateKey';
+import { hashKey, partialMatchKey } from './utils';
 
 export const watchModalImpl: WatchImpl = ({ modalKey, modalInfoManageMap }) => {
-  return modalInfoManageMap.get(typeof modalKey === 'string' ? modalKey : JSON.stringify(modalKey));
+  return modalInfoManageMap.get(hashKey(modalKey));
 };
 
+/**
+ * destroy doesn't execute modal onClose/onSubmit callbacks.
+ */
 export const destroyModalImpl: DestroyImpl = async ({ modalInfoManageMap, setOpenedModalList }) => {
   queueMicrotask(() => {
     modalInfoManageMap.clear();
@@ -28,13 +39,14 @@ const generateModalRef: GenerateModalRef = ({
   ModalComponent,
   modalInfoManageMap,
   modalKey,
+  hashedModalKey,
   options,
   onClose,
   onSubmit,
 }) => {
-  const stringifiedModalKey: StringifiedModalKey = JSON.stringify(modalKey);
-  modalInfoManageMap.set(stringifiedModalKey, {
-    modalKey: stringifiedModalKey,
+  modalInfoManageMap.set(hashedModalKey, {
+    modalKey,
+    hashedModalKey,
     ModalComponent,
     options,
     modalRef: null,
@@ -44,13 +56,13 @@ const generateModalRef: GenerateModalRef = ({
 
   const modalRef: RefCallback<HTMLElement> = <T extends HTMLElement | null>(node: T) => {
     if (node) {
-      const modalInfo = modalInfoManageMap.get(stringifiedModalKey);
+      const modalInfo = modalInfoManageMap.get(hashedModalKey);
 
       if (modalInfo) {
         modalInfo.modalRef = node;
       } else {
         console.error(
-          `Failed to set a modal ref with key: ${stringifiedModalKey}.\nThis error occurs because the modal has already been removed or the modal key is invalid.\nPlease check your modal key.\nBtw, this error is not critical and will not stop the application.`,
+          `Failed to set a modal ref with key: ${hashedModalKey}.\nThis error occurs because the modal has already been removed or the modal key is invalid.\nPlease check your modal key.\nBtw, this error is not critical and will not stop the application.`,
         );
       }
     }
@@ -73,23 +85,47 @@ const generateModalRef: GenerateModalRef = ({
   return modalRef as ModalRef;
 };
 
-export const closeModalImpl: CloseModalImpl = async ({ modalKey, modalInfoManageMap, setOpenedModalList }) => {
-  const stringifiedModalKey: StringifiedModalKey = typeof modalKey === 'string' ? modalKey : JSON.stringify(modalKey);
+const notifyUnIntendedCloseException = (hashedModalKey: HashedModalKey, removalResult: boolean) => {
+  if (!removalResult) {
+    console.error(
+      `Failed to remove a modal with key: ${hashedModalKey}.\nThis error occurs because the modal has already been removed or the modal key is invalid.\nPlease check your modal key.\nBtw, this error is not critical and will not stop the application.`,
+    );
+  }
+};
 
-  return new Promise<ModalCallback>((resolve) => {
+export const closeModalImpl: CloseModalImpl = async ({ modalKey, exact, modalInfoManageMap, setOpenedModalList }) => {
+  const hashedModalKey: HashedModalKey = hashKey(modalKey);
+
+  return new Promise<Array<ModalCallback>>((resolve) => {
+    const modalCallbackList: Array<ModalCallback> = [];
+
     queueMicrotask(() => {
-      setOpenedModalList((prev) => {
-        return prev.filter((modal) => modal.modalKey !== stringifiedModalKey);
-      });
-      const { onClose, onSubmit } = modalInfoManageMap.get(stringifiedModalKey) ?? {};
-      resolve({ onClose, onSubmit });
-      const removalResult = modalInfoManageMap.delete(stringifiedModalKey);
+      if (exact) {
+        setOpenedModalList((prev) => {
+          return prev.filter((modal) => modal.hashedModalKey !== hashedModalKey);
+        });
+        const { onClose, onSubmit } = modalInfoManageMap.get(hashedModalKey) ?? {};
+        modalCallbackList.push({ onClose, onSubmit });
+        const removalResult = modalInfoManageMap.delete(hashedModalKey);
 
-      if (!removalResult) {
-        console.error(
-          `Failed to remove a modal with key: ${stringifiedModalKey}.\nThis error occurs because the modal has already been removed or the modal key is invalid.\nPlease check your modal key.\nBtw, this error is not critical and will not stop the application.`,
-        );
+        notifyUnIntendedCloseException(hashedModalKey, removalResult);
+      } else {
+        setOpenedModalList((prev) => {
+          return prev.filter((modal) => !partialMatchKey(modal.modalKey, modalKey));
+        });
+
+        for (const [key, modalQuery] of modalInfoManageMap.entries()) {
+          if (partialMatchKey(modalQuery.modalKey, modalKey)) {
+            const { onClose, onSubmit } = modalQuery;
+            modalCallbackList.push({ onClose, onSubmit });
+            const removalResult = modalInfoManageMap.delete(key);
+
+            notifyUnIntendedCloseException(key, removalResult);
+          }
+        }
       }
+
+      resolve(modalCallbackList);
     });
   });
 };
@@ -97,7 +133,7 @@ export const closeModalImpl: CloseModalImpl = async ({ modalKey, modalInfoManage
 const handleCloseModal: HandleCloseModal =
   ({ modalInfoManageMap, modalKey, setOpenedModalList }) =>
   async () => {
-    const { onClose } = await closeModalImpl({ modalKey, modalInfoManageMap, setOpenedModalList });
+    const [{ onClose }] = await closeModalImpl({ modalKey, modalInfoManageMap, setOpenedModalList, exact: true });
 
     if (typeof onClose === 'function') {
       onClose();
@@ -112,7 +148,7 @@ const handleSubmitModal: HandleSubmitModal =
       e.persist?.();
     }
 
-    const { onSubmit } = await closeModalImpl({ modalKey, modalInfoManageMap, setOpenedModalList });
+    const [{ onSubmit }] = await closeModalImpl({ modalKey, modalInfoManageMap, setOpenedModalList, exact: true });
 
     if (typeof onSubmit === 'function') {
       onSubmit();
@@ -135,25 +171,31 @@ export const openModalImpl: OpenModalImpl = ({
     );
   }
 
-  if (modalKey.length === 0 || modalKey.find((key) => key.length === 0)) {
+  if (modalKey.length === 0 || (typeof modalKey[0] === 'string' && modalKey[0].length === 0)) {
     throw new Error('The modal key must not be empty and must not contain an empty string.');
   }
 
-  const modalRef: ReturnType<GenerateModalRef> = generateModalRef({
-    ModalComponent,
-    modalKey,
-    options,
-    onClose: modalProps.onClose,
-    onSubmit: modalProps.onSubmit,
-    modalInfoManageMap,
-  });
+  const hashedModalKey = hashKey(modalKey);
+  // prevent duplicate modals with the same key
+  if (modalInfoManageMap.has(hashedModalKey)) {
+    throw new Error(`The modal with key ${JSON.stringify(modalKey)} is already open.`);
+  }
 
   setOpenedModalList((prev) => [
     ...prev,
     {
-      modalKey: JSON.stringify(modalKey),
+      hashedModalKey,
+      modalKey,
       internalUniqueKey: generateKey(),
-      modalRef,
+      modalRef: generateModalRef({
+        ModalComponent,
+        modalKey,
+        modalInfoManageMap,
+        hashedModalKey,
+        options,
+        onClose: modalProps.onClose,
+        onSubmit: modalProps.onSubmit,
+      }),
       modalProps: {
         ...modalProps,
         closeModal: handleCloseModal({
@@ -171,4 +213,62 @@ export const openModalImpl: OpenModalImpl = ({
       ModalComponent,
     },
   ]);
+};
+
+export const generateModalAPI = ({
+  modalInfoManageMap,
+  openedModalList,
+  modalCountLimitRef,
+  mode,
+  setOpenedModalList,
+}: GenerateModalAPI): GenerateModalAPIReturn => {
+  const watch: Watch = ({ modalKey }) => watchModalImpl({ modalKey, modalInfoManageMap });
+
+  const destroy: Destroy = async () =>
+    destroyModalImpl({
+      modalInfoManageMap,
+      setOpenedModalList,
+    });
+
+  const changeModalCountLimit: ChangeModalCountLimit = (newLimits) => {
+    modalCountLimitRef.current = newLimits;
+  };
+
+  const closeModal: CloseModal = async ({ modalKey, exact }) => {
+    if (!modalKey) {
+      return;
+    }
+
+    const modalCallbackList = await closeModalImpl({
+      modalKey,
+      exact,
+      modalInfoManageMap,
+      setOpenedModalList,
+    });
+
+    modalCallbackList.forEach(({ onClose }) => {
+      if (typeof onClose === 'function') {
+        onClose();
+      }
+    });
+  };
+
+  const openModal: OpenModal = ({ options, ...restOpenGlobalModalParam }) => {
+    openModalImpl({
+      modalCountLimit: modalCountLimitRef.current,
+      modalInfoManageMap,
+      openedModalList,
+      setOpenedModalList,
+      options: { ...mode, ...options },
+      ...restOpenGlobalModalParam,
+    });
+  };
+
+  return {
+    watch,
+    destroy,
+    changeModalCountLimit,
+    closeModal,
+    openModal,
+  };
 };

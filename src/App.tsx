@@ -1,9 +1,9 @@
-import { useGlobalModalList, useModalList } from '@/lib';
+import { useGlobalModalList, useModalList, useToggleModal } from '@/lib';
 import TestModal from './TestModal';
 import { useEffect } from 'react';
 
 function App() {
-  const { ModalComponentList, openModal, watch } = useModalList({
+  const { ModalComponentList, openModal, watch, closeModal } = useModalList({
     mode: { resistBackgroundClick: false, resistESC: false, scrollable: true },
   });
 
@@ -11,17 +11,22 @@ function App() {
     mode: { resistBackgroundClick: false, resistESC: false, scrollable: true },
   });
 
-  const modal1Watcher = watch({ modalKey: ['test'] });
-  const modal1Watcher2 = watch({ modalKey: ['test2'] });
+  const { isModalOpen, modalRef, toggleModal } = useToggleModal({
+    initialValue: false,
+    openModalOptions: { resistBackgroundClick: true },
+  });
+
+  const modalWatcher = watch({ modalKey: ['test'] });
+  const modalWatcher2 = watch({ modalKey: ['test', 2] });
   const globalModalWatcher = watchGlobalModal({ modalKey: ['test'] });
 
   useEffect(() => {
-    console.log(modal1Watcher);
-  }, [modal1Watcher]);
+    console.log(modalWatcher);
+  }, [modalWatcher]);
 
   useEffect(() => {
-    console.log(modal1Watcher2);
-  }, [modal1Watcher2]);
+    console.log(modalWatcher2);
+  }, [modalWatcher2]);
 
   useEffect(() => {
     console.log(globalModalWatcher);
@@ -38,10 +43,10 @@ function App() {
 
   const openModal2 = () => {
     openModal({
-      modalKey: ['test2'],
+      modalKey: ['test', 2],
       ModalComponent: TestModal,
       modalProps: {},
-      options: { resistBackgroundClick: true },
+      options: { resistBackgroundClick: [['test']] },
     });
   };
 
@@ -50,16 +55,28 @@ function App() {
       modalKey: ['test'],
       ModalComponent: TestModal,
       modalProps: {},
-      options: { resistBackgroundClick: true },
+      options: { resistBackgroundClick: false },
     });
+  };
+
+  const killTestModals = () => {
+    closeModal({ modalKey: ['test'], exact: true });
   };
 
   return (
     <div>
       <ModalComponentList />
+      {isModalOpen && (
+        <div ref={modalRef}>
+          <h1>Modal</h1>
+          <button onClick={toggleModal}>Close Modal</button>
+        </div>
+      )}
+      <button onClick={killTestModals}>kill TestModals</button>
       <button onClick={openModal1}>Open Modal 1</button>
       <button onClick={openModal2}>Open Modal 1 duplicate</button>
       <button onClick={openGlobalModal1}>Open Global Modal 1</button>
+      <button onClick={toggleModal}>Toggle Modal</button>
     </div>
   );
 }

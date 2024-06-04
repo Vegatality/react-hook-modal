@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { RefCallback, useCallback, useEffect, useRef } from 'react';
 
 import { OpenModalOptions } from '../interface';
 import { useToggle } from './useToggle';
@@ -21,6 +21,18 @@ interface IOpenModalOptions extends Omit<OpenModalOptions, 'scrollable'> {
    */
   resistESC?: boolean;
 }
+
+interface UseToggleModalOption {
+  /**
+   * #### initial value of the modal
+   * @default false
+   */
+  initialValue?: boolean;
+  /**
+   * #### open modal options
+   */
+  openModalOptions?: IOpenModalOptions;
+}
 interface UseToggleModalReturn<T extends HTMLElement> {
   /**
    * is Modal Open
@@ -29,7 +41,7 @@ interface UseToggleModalReturn<T extends HTMLElement> {
   /**
    * modal ref
    */
-  modalRef: React.MutableRefObject<T | null>;
+  modalRef: RefCallback<T>;
   /**
    * modal toggle function
    */
@@ -42,19 +54,19 @@ interface UseToggleModalReturn<T extends HTMLElement> {
  * @description
  * You can use this hook for toggling anything, not just a modal.
  *
- * @param initialValue - initial value of the modal
+ * @param useToggleModalOption.initialValue - initial value of the modal
  * @default false
  *
- * @param openModalOptions.resistOnBackgroundClick - Is the modal resistant to background clicks
+ * @param useToggleModalOption.openModalOptions.resistOnBackgroundClick - Is the modal resistant to background clicks
  * @default false
  *
- * @param openModalOptions.resistOnESC - Is the modal resistant to the ESC key
+ * @param useToggleModalOption.openModalOptions.resistOnESC - Is the modal resistant to the ESC key
  * @default false
  *
  * @example
  * ```tsx
  * function App () {
- *  const { isModalOpen, modalRef, toggleModal } = useToggleModal<HTMLDivElement>(false, { resistBackgroundClick: true });
+ *  const { isModalOpen, modalRef, toggleModal } = useToggleModal<HTMLDivElement>({ initialValue: false, openModalOptions: { resistBackgroundClick: true } });
  *  return (
  *    <div>
  *      <button onClick={toggleModal}>Toggle Modal</button>
@@ -69,16 +81,22 @@ interface UseToggleModalReturn<T extends HTMLElement> {
  * }
  * ```
  */
-const useToggleModal = <T extends HTMLElement>(
-  initialValue = false,
-  openModalOptions?: IOpenModalOptions,
+const useToggleModal = <T extends HTMLElement = HTMLElement>(
+  useToggleModalOption: UseToggleModalOption = {},
 ): UseToggleModalReturn<T> => {
-  const [isModalOpen, toggleModal] = useToggle(initialValue);
+  const [isModalOpen, toggleModal] = useToggle(useToggleModalOption.initialValue ?? false);
 
   const modalRef = useRef<T | null>(null);
+  const refCallback: RefCallback<T> = useCallback((node) => {
+    if (node) {
+      modalRef.current = node;
+    }
+  }, []);
 
   useEffect(() => {
-    const closeModal = (e: Event) => {
+    const closeModalOnMouseDown = async (e: MouseEvent) => {
+      if (useToggleModalOption.openModalOptions?.resistBackgroundClick) return;
+
       queueMicrotask(() => {
         if (isModalOpen && modalRef.current && !modalRef.current.contains(e.target as Node)) {
           toggleModal();
@@ -86,18 +104,14 @@ const useToggleModal = <T extends HTMLElement>(
       });
     };
 
-    const closeModalOnMouseDown = async (e: MouseEvent) => {
-      if (openModalOptions?.resistBackgroundClick) return;
-
-      closeModal(e);
-    };
-
     const closeModalOnESC = (e: KeyboardEvent) => {
-      if (openModalOptions?.resistESC) return;
+      if (useToggleModalOption.openModalOptions?.resistESC) return;
 
-      if (e.key === 'Escape') {
-        toggleModal();
-      }
+      queueMicrotask(() => {
+        if (isModalOpen && e.key === 'Escape') {
+          toggleModal();
+        }
+      });
     };
 
     document.addEventListener('mousedown', closeModalOnMouseDown);
@@ -107,9 +121,14 @@ const useToggleModal = <T extends HTMLElement>(
       document.removeEventListener('mousedown', closeModalOnMouseDown);
       document.removeEventListener('keydown', closeModalOnESC);
     };
-  }, [isModalOpen, toggleModal, openModalOptions]);
+  }, [
+    isModalOpen,
+    toggleModal,
+    useToggleModalOption.openModalOptions?.resistBackgroundClick,
+    useToggleModalOption.openModalOptions?.resistESC,
+  ]);
 
-  return { isModalOpen, modalRef, toggleModal };
+  return { isModalOpen, modalRef: refCallback, toggleModal };
 };
 
 export { useToggleModal };

@@ -8,21 +8,21 @@ import { setCloseOnMouseDown } from '../utils/closeModalOnMouseDown';
 
 interface UseCloseModalOnMouseDownParam {
   modalInfoManageMap: ModalInfoManageMap;
-  closeWithModalKeyImpl: CloseModal;
+  closeModal: CloseModal;
   dependencyList?: DependencyList;
 }
 
 export const useCloseModalOnEventFire = ({
   modalInfoManageMap,
-  closeWithModalKeyImpl,
+  closeModal,
   dependencyList = [],
 }: UseCloseModalOnMouseDownParam) => {
   useEffect(() => {
     const closeOnMouseDown = setCloseOnMouseDown({
       modalInfoManageMap,
-      closeWithModalKeyImpl,
+      closeModal,
     });
-    const closeOnESC = setCloseOnESC({ modalInfoManageMap, closeWithModalKeyImpl });
+    const closeOnESC = setCloseOnESC({ modalInfoManageMap, closeModal });
 
     document.addEventListener('mousedown', closeOnMouseDown);
     document.addEventListener('keydown', closeOnESC);

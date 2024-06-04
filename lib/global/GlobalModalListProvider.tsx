@@ -1,89 +1,42 @@
 'use client';
 
-import { useMemo, useRef, useState } from 'react';
+import { useMemo } from 'react';
 import { useCloseModalOnEventFire } from '../hooks/useCloseModalOnEventFire';
+import { useGenerateModalAPI } from '../hooks/useGenerateModalAPI';
 import { useResistScrollingDim } from '../hooks/useResistScrollingDim';
-import {
-  ChangeModalCountLimit,
-  CloseModal,
-  Destroy,
-  GlobalModalListProviderProps,
-  IGlobalModalListDispatchContext,
-  ModalInfoManageMap,
-  OpenModal,
-  OpenedModalState,
-  Watch,
-} from '../interface';
-import { closeModalImpl, destroyModalImpl, openModalImpl, watchModalImpl } from '../utils/modalCoreUtils';
+import { GlobalModalListProviderProps, IGlobalModalListDispatchContext } from '../interface';
 import { GlobalModalListDispatchContext, GlobalModalListStateContext } from './useGlobalModalListDispatch';
 
 export const GlobalModalListProvider = ({ children, modalCountLimit, mode }: GlobalModalListProviderProps) => {
-  const initialLimitsRef = useRef<number | null>(modalCountLimit ?? null);
-  const globalModalInfoManageMapRef = useRef<ModalInfoManageMap>(new Map());
-  const [openedGlobalModalList, setOpenedGlobalModalList] = useState<OpenedModalState[]>([]);
-
-  const watchGlobalModal: Watch = ({ modalKey }) =>
-    watchModalImpl({ modalKey, modalInfoManageMap: globalModalInfoManageMapRef.current });
-
-  const destroyGlobalModal: Destroy = async () =>
-    destroyModalImpl({
-      modalInfoManageMap: globalModalInfoManageMapRef.current,
-      setOpenedModalList: setOpenedGlobalModalList,
+  const { changeModalCountLimit, closeModal, destroy, modalInfoManageMap, openModal, openedModalList, watch } =
+    useGenerateModalAPI({
+      modalCountLimit,
+      mode,
     });
-
-  const changeGlobalModalCountLimit: ChangeModalCountLimit = (newLimits) => {
-    initialLimitsRef.current = newLimits;
-  };
-
-  const closeGlobalModal: CloseModal = async ({ modalKey }) => {
-    const { onClose } = await closeModalImpl({
-      modalKey,
-      modalInfoManageMap: globalModalInfoManageMapRef.current,
-      setOpenedModalList: setOpenedGlobalModalList,
-    });
-
-    if (typeof onClose === 'function') {
-      onClose();
-    }
-  };
-
-  const openGlobalModal: OpenModal = ({ options, ...restOpenGlobalModalParam }) => {
-    openModalImpl({
-      modalCountLimit: initialLimitsRef.current,
-      modalInfoManageMap: globalModalInfoManageMapRef.current,
-      openedModalList: openedGlobalModalList,
-      setOpenedModalList: setOpenedGlobalModalList,
-      options: { ...mode, ...options },
-      ...restOpenGlobalModalParam,
-    });
-  };
 
   const dispatch: IGlobalModalListDispatchContext = useMemo(
     () => ({
-      closeGlobalModal,
-      destroyGlobalModal,
-      openGlobalModal,
-      watchGlobalModal,
-      changeGlobalModalCountLimit,
+      closeGlobalModal: closeModal,
+      destroyGlobalModal: destroy,
+      openGlobalModal: openModal,
+      watchGlobalModal: watch,
+      changeGlobalModalCountLimit: changeModalCountLimit,
     }),
-    [openedGlobalModalList],
+    [openedModalList],
   );
 
-  // options
   useCloseModalOnEventFire({
-    modalInfoManageMap: globalModalInfoManageMapRef.current,
-    closeWithModalKeyImpl: closeGlobalModal,
+    modalInfoManageMap,
+    closeModal,
   });
   useResistScrollingDim({
-    modalInfoManageMap: globalModalInfoManageMapRef.current,
-    dependencyList: [openedGlobalModalList],
+    modalInfoManageMap,
+    dependencyList: [openedModalList],
   });
 
   return (
     <GlobalModalListDispatchContext.Provider value={dispatch}>
-      <GlobalModalListStateContext.Provider value={openedGlobalModalList}>
-        {children}
-      </GlobalModalListStateContext.Provider>
+      <GlobalModalListStateContext.Provider value={openedModalList}>{children}</GlobalModalListStateContext.Provider>
     </GlobalModalListDispatchContext.Provider>
   );
 };

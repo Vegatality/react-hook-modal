@@ -1,10 +1,8 @@
 import { ComponentProps, ComponentType, Dispatch, RefCallback, SetStateAction } from 'react';
 
-/**
- * TODO: It might be better to allow various array types(e.g. tuple type) for the structural modal key, not just a string array.
- */
-export type ModalKey = readonly string[];
-export type StringifiedModalKey = string;
+export type ModalKey = ReadonlyArray<unknown>;
+export type HashedModalKey = string;
+export type ObjectFrame = Record<PropertyKey, any>;
 
 export type OpenModalOptions = {
   /**
@@ -13,16 +11,62 @@ export type OpenModalOptions = {
    * - If the resistBackgroundClick option is set to a string array, the modal will remain open if any modal with a key matching a string in the array is open.
    * - If the resistBackgroundClick option is set to true, the modal will remain open even if user clicks on the background.
    * @default false
+   * @example
+   * ```tsx
+   * openModal({
+   *  modalKey: ['test'],
+   *  ModalComponent: TestModal,
+   *  modalProps: {},
+   *  options: { resistBackgroundClick: true },
+   * });
+   *
+   * openModal({
+   *  modalKey: ['test', 2],
+   *  ModalComponent: TestModal,
+   *  modalProps: {},
+   *  options: { resistBackgroundClick: [['test']] },
+   * });
+   *
+   * openModal({
+   *  modalKey: ['test', 3],
+   *  ModalComponent: TestModal,
+   *  modalProps: {},
+   *  options: { resistBackgroundClick: [['test'], ['test', 2]] },
+   * });
+   * ```
    */
-  resistBackgroundClick?: boolean | ModalKey;
+  resistBackgroundClick?: boolean | Array<ModalKey>;
   /**
    * #### Is the modal resistant to the ESC key
    * @description
    * - If the resistESC option is set to a string array, the modal will remain open if any modal with a key matching a string in the array is open.
    * - If the resistESC option is set to true, the modal will remain open even if user presses the ESC key.
    * @default false
+   * @example
+   * ```tsx
+   * openModal({
+   *  modalKey: ['test'],
+   *  ModalComponent: TestModal,
+   *  modalProps: {},
+   *  options: { resistESC: true },
+   * });
+   *
+   * openModal({
+   *  modalKey: ['test', 2],
+   *  ModalComponent: TestModal,
+   *  modalProps: {},
+   *  options: { resistESC: [['test']] },
+   * });
+   *
+   * openModal({
+   *  modalKey: ['test', 3],
+   *  ModalComponent: TestModal,
+   *  modalProps: {},
+   *  options: { resistESC: [['test'], ['test', 2]] },
+   * });
+   * ```
    */
-  resistESC?: boolean | ModalKey;
+  resistESC?: boolean | Array<ModalKey>;
   /**
    * #### Is background scrollable
    * @description If any modal in the modalList has the scrollable option set to false, the background will become unscrollable, even if other modals have this option set to true.
@@ -40,7 +84,7 @@ interface OptionalModalProps {
   closeModal?: () => Promise<void>;
   submitModal?: (e?: React.BaseSyntheticEvent) => Promise<void>;
   modalRef?: ReturnType<GenerateModalRef>;
-  stringifiedCurrentModalKey?: StringifiedModalKey;
+  currentModalKey?: ModalKey;
 }
 
 export interface RequiredModalProps extends Required<OptionalModalProps> {}
@@ -81,25 +125,29 @@ export type ModalComponent<CustomProps = unknown> = ComponentType<CustomProps & 
 export type ModalComponentProps<CustomProps = unknown> = ComponentProps<ModalComponent<CustomProps>>;
 
 export interface OpenedModalState<MC extends ModalComponent = ModalComponent> {
+  /**
+   * - The internalUniqueKey is used for unique key in the openedModalList.
+   * - ~~The reason why the `internalUniqueKey` is used instead of the `modalKey` is that you can open the same modal component multiple times with the same modal key, which would not be appropriate for a list item's unique key.~~
+   */
   internalUniqueKey: number;
-  modalKey: StringifiedModalKey;
+  hashedModalKey: HashedModalKey;
+  modalKey: ModalKey;
   /**
    * The modalRef is managed as a separate property from modalProps.
    */
   modalRef: ReturnType<GenerateModalRef>;
-  modalProps: Omit<ComponentProps<MC>, 'modalRef' | 'stringifiedCurrentModalKey'>;
+  modalProps: Omit<ComponentProps<MC>, 'modalRef' | 'currentModalKey'>;
   options?: OpenModalOptions;
   ModalComponent: MC;
 }
 
-type ExcludedKeysForProcessingOnOpenModalParam = 'modalKey' | 'modalProps' | 'modalRef';
+type ExcludedKeysForProcessingOnOpenModalParam = 'hashedModalKey' | 'modalProps' | 'modalRef';
 type UnnecessaryModalPropsOnOpenModalParam = keyof RequiredModalProps;
 interface OpenModalParam<MC extends ModalComponent = ModalComponent>
   extends Omit<OpenedModalState<MC>, ExcludedKeysForProcessingOnOpenModalParam | 'internalUniqueKey'> {
-  modalKey: ModalKey;
   modalProps: ModalCallback & Omit<ComponentProps<MC>, UnnecessaryModalPropsOnOpenModalParam>;
 }
-type SetOpenedModalList = Dispatch<SetStateAction<OpenedModalState<ModalComponent>[]>>;
+export type SetOpenedModalList = Dispatch<SetStateAction<OpenedModalState<ModalComponent>[]>>;
 
 interface OpenModalImplParam<MC extends ModalComponent = ModalComponent> extends OpenModalParam<MC> {
   modalCountLimit: number | null;
@@ -119,9 +167,9 @@ interface ModalInfoManageMapState
     ModalCallback {
   modalRef: HTMLElement | null;
 }
-export type ModalInfoManageMap = Map<StringifiedModalKey, ModalInfoManageMapState>;
+export type ModalInfoManageMap = Map<HashedModalKey, ModalInfoManageMapState>;
 
-type WatchParam = { modalKey: ModalKey | StringifiedModalKey };
+type WatchParam = { modalKey: ModalKey };
 interface WatchImplParam extends WatchParam {
   modalInfoManageMap: ModalInfoManageMap;
 }
@@ -137,6 +185,7 @@ export interface ModalRef extends RefCallback<HTMLElement> {
 interface GenerateModalRefParam extends ModalCallback {
   ModalComponent: ModalComponent;
   modalKey: ModalKey;
+  hashedModalKey: HashedModalKey;
   options?: OpenModalOptions;
   modalInfoManageMap: ModalInfoManageMap;
 }
@@ -147,14 +196,15 @@ type CloseModalParam = {
   /**
    * modalKey should be a string array or a stringified modal key.
    */
-  modalKey: ModalKey | StringifiedModalKey;
+  modalKey: ModalKey;
+  exact?: boolean;
 };
 interface CloseModalImplParam extends CloseModalParam {
   modalInfoManageMap: ModalInfoManageMap;
   setOpenedModalList: SetOpenedModalList;
 }
 
-interface CloseModalImplReturn extends Promise<ModalCallback> {}
+interface CloseModalImplReturn extends Promise<Array<ModalCallback>> {}
 export type CloseModalImpl = (closeModalImplParam: CloseModalImplParam) => CloseModalImplReturn;
 export type CloseModal = (closeModalParam: CloseModalParam) => Promise<void>;
 
@@ -182,6 +232,22 @@ export type Destroy = () => Promise<void>;
  * It will only affect the limit of the number of modals that can be opened.
  */
 export type ChangeModalCountLimit = (newLimits: number) => void;
+
+export interface GenerateModalAPI {
+  modalInfoManageMap: ModalInfoManageMap;
+  openedModalList: OpenedModalState[];
+  modalCountLimitRef: React.MutableRefObject<number | null>;
+  mode?: DefaultMode;
+  setOpenedModalList: SetOpenedModalList;
+}
+
+export interface GenerateModalAPIReturn {
+  watch: Watch;
+  destroy: Destroy;
+  changeModalCountLimit: ChangeModalCountLimit;
+  closeModal: CloseModal;
+  openModal: OpenModal;
+}
 
 export interface DefaultMode extends OpenModalOptions {
   resistBackgroundClick?: boolean;
