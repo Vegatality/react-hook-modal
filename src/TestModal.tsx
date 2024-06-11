@@ -1,4 +1,4 @@
-import { ModalComponentProps } from '@/lib';
+import { ModalComponentProps } from '../';
 
 const TestModal = ({ modalRef, closeModal }: ModalComponentProps) => {
   return (

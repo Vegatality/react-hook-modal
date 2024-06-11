@@ -2,7 +2,7 @@
 
 import { useRef, useState } from 'react';
 import { GenerateModalAPIReturn, ModalInfoManageMap, OpenedModalState, UseModalListOptions } from '../interface';
-import { generateModalAPI } from '../utils/modalCoreUtils';
+import { generateModalAPI } from '../core/modalCore';
 
 interface UseGenerateModalAPIParam extends UseModalListOptions {}
 interface UseGenerateMoalAPIReturn extends GenerateModalAPIReturn {
@@ -15,16 +15,14 @@ export const useGenerateModalAPI = ({ modalCountLimit, mode }: UseGenerateModalA
   const modalInfoManageMapRef = useRef<ModalInfoManageMap>(new Map());
   const [openedModalList, setOpenedModalList] = useState<OpenedModalState[]>([]);
 
-  const modalAPIs = generateModalAPI({
-    modalCountLimitRef: initialLimitsRef,
-    modalInfoManageMap: modalInfoManageMapRef.current,
-    openedModalList,
-    setOpenedModalList,
-    mode,
-  });
-
   return {
-    ...modalAPIs,
+    ...generateModalAPI({
+      modalCountLimitRef: initialLimitsRef,
+      modalInfoManageMap: modalInfoManageMapRef.current,
+      openedModalList,
+      setOpenedModalList,
+      mode,
+    }),
     openedModalList,
     modalInfoManageMap: modalInfoManageMapRef.current,
   };

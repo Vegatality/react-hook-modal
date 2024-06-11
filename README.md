@@ -405,20 +405,15 @@ const App = () => {
 You can close the modal with a hierarchical modal key.<br />
 If you want to close a modal with an exactly matched modal key, you must set the `exact` option to `true`.
 
-<details>
-<summary>View</summary>
-
 ```tsx
 const killTestModals = () => {
-  closeModal({ modalKey: ['test'] });
+  closeModal({ modalKey: ['test'] }); // This will close modals with key like ['test'], ['test', 1], ['test', 2], ['test', 2, { once: true } ], and etc.
 };
 
 const killTestModalExactly = () => {
-  closeModal({ modalKey: ['test'], exact: true });
+  closeModal({ modalKey: ['test'], exact: true }); // This will only close modal with key ['test']
 };
 ```
-
-</details>
 
 <br />
 <br />

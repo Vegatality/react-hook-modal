@@ -1,4 +1,4 @@
-import { useGlobalModalList, useModalList, useToggleModal } from '@/lib';
+import { useGlobalModalList, useModalList, useToggleModal } from '../';
 import TestModal from './TestModal';
 import { useEffect } from 'react';
 

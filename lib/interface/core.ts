@@ -4,11 +4,11 @@ export type ModalKey = ReadonlyArray<unknown>;
 export type HashedModalKey = string;
 export type ObjectFrame = Record<PropertyKey, any>;
 
-export type OpenModalOptions = {
+export interface OpenModalOptions {
   /**
    * #### Is the modal resistant to background clicks
    * @description
-   * - If the resistBackgroundClick option is set to a string array, the modal will remain open if any modal with a key matching a string in the array is open.
+   * - If the resistBackgroundClick option is set to an array, the modal will remain open if any modal matching a key in the array is open.
    * - If the resistBackgroundClick option is set to true, the modal will remain open even if user clicks on the background.
    * @default false
    * @example
@@ -39,7 +39,7 @@ export type OpenModalOptions = {
   /**
    * #### Is the modal resistant to the ESC key
    * @description
-   * - If the resistESC option is set to a string array, the modal will remain open if any modal with a key matching a string in the array is open.
+   * - If the resistESC option is set to an array, the modal will remain open if any modal matching a key in the array is open.
    * - If the resistESC option is set to true, the modal will remain open even if user presses the ESC key.
    * @default false
    * @example
@@ -73,21 +73,21 @@ export type OpenModalOptions = {
    * @default false
    */
   scrollable?: boolean;
-};
+}
 
 export interface ModalCallback {
   onClose?: VoidFunction;
   onSubmit?: VoidFunction;
 }
 
-interface OptionalModalProps {
-  closeModal?: () => Promise<void>;
-  submitModal?: (e?: React.BaseSyntheticEvent) => Promise<void>;
-  modalRef?: ReturnType<GenerateModalRef>;
-  currentModalKey?: ModalKey;
+export interface RequiredModalProps {
+  closeModal: () => Promise<void>;
+  submitModal: (e?: React.BaseSyntheticEvent) => Promise<void>;
+  modalRef: ReturnType<GenerateModalRef>;
+  currentModalKey: ModalKey;
 }
 
-export interface RequiredModalProps extends Required<OptionalModalProps> {}
+export interface OptionalModalProps extends Partial<RequiredModalProps> {}
 
 /**
  * modalcomponent type
@@ -142,10 +142,9 @@ export interface OpenedModalState<MC extends ModalComponent = ModalComponent> {
 }
 
 type ExcludedKeysForProcessingOnOpenModalParam = 'hashedModalKey' | 'modalProps' | 'modalRef';
-type UnnecessaryModalPropsOnOpenModalParam = keyof RequiredModalProps;
 interface OpenModalParam<MC extends ModalComponent = ModalComponent>
   extends Omit<OpenedModalState<MC>, ExcludedKeysForProcessingOnOpenModalParam | 'internalUniqueKey'> {
-  modalProps: ModalCallback & Omit<ComponentProps<MC>, UnnecessaryModalPropsOnOpenModalParam>;
+  modalProps: ModalCallback & Omit<ComponentProps<MC>, keyof RequiredModalProps>;
 }
 export type SetOpenedModalList = Dispatch<SetStateAction<OpenedModalState<ModalComponent>[]>>;
 
@@ -156,9 +155,6 @@ interface OpenModalImplParam<MC extends ModalComponent = ModalComponent> extends
   modalInfoManageMap: ModalInfoManageMap;
 }
 export type OpenModalImpl = <MC extends ModalComponent<any>>(openModalParam: OpenModalImplParam<MC>) => void;
-/**
- * TODO: Find a better alternative to using any
- */
 // export type OpenModal = <MC extends ModalComponent<{ [key: string]: any }[0]>>(
 export type OpenModal = <MC extends ModalComponent<any>>(openModalParam: OpenModalParam<MC>) => void;
 
@@ -192,19 +188,19 @@ interface GenerateModalRefParam extends ModalCallback {
 
 export type GenerateModalRef = (generateModalRefParam: GenerateModalRefParam) => ModalRef;
 
-type CloseModalParam = {
+interface CloseModalParam {
   /**
    * modalKey should be a string array or a stringified modal key.
    */
   modalKey: ModalKey;
   exact?: boolean;
-};
+}
 interface CloseModalImplParam extends CloseModalParam {
   modalInfoManageMap: ModalInfoManageMap;
   setOpenedModalList: SetOpenedModalList;
 }
 
-interface CloseModalImplReturn extends Promise<Array<ModalCallback>> {}
+type CloseModalImplReturn = Promise<Array<ModalCallback>>;
 export type CloseModalImpl = (closeModalImplParam: CloseModalImplParam) => CloseModalImplReturn;
 export type CloseModal = (closeModalParam: CloseModalParam) => Promise<void>;
 
@@ -220,10 +216,10 @@ export type HandleSubmitModal = (
   handleSubmitModalParam: HandleSubmitModalParam,
 ) => (e?: React.BaseSyntheticEvent) => Promise<void>;
 
-type DestroyImplParam = {
+interface DestroyImplParam {
   modalInfoManageMap: ModalInfoManageMap;
   setOpenedModalList: SetOpenedModalList;
-};
+}
 export type DestroyImpl = (destroyImplParam: DestroyImplParam) => ReturnType<Destroy>;
 export type Destroy = () => Promise<void>;
 
@@ -233,6 +229,11 @@ export type Destroy = () => Promise<void>;
  */
 export type ChangeModalCountLimit = (newLimits: number) => void;
 
+export interface DefaultMode extends OpenModalOptions {
+  resistBackgroundClick?: boolean;
+  resistESC?: boolean;
+  scrollable?: boolean;
+}
 export interface GenerateModalAPI {
   modalInfoManageMap: ModalInfoManageMap;
   openedModalList: OpenedModalState[];
@@ -249,21 +250,11 @@ export interface GenerateModalAPIReturn {
   openModal: OpenModal;
 }
 
-export interface DefaultMode extends OpenModalOptions {
-  resistBackgroundClick?: boolean;
-  resistESC?: boolean;
-  scrollable?: boolean;
-}
 export interface UseModalListOptions {
   modalCountLimit?: number;
   mode?: DefaultMode;
 }
-export interface UseModalListReturn {
-  watch: Watch;
-  destroy: Destroy;
-  changeModalCountLimit: ChangeModalCountLimit;
-  openModal: OpenModal;
-  closeModal: CloseModal;
+export interface UseModalListReturn extends GenerateModalAPIReturn {
   ModalComponentList: () => JSX.Element[];
 }
 export type UseModalList = (useModalListOptions?: UseModalListOptions) => UseModalListReturn;

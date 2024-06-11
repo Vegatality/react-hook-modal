@@ -18,17 +18,17 @@ import {
   Watch,
   WatchImpl,
 } from '../interface';
-import { generateKey } from './generateKey';
-import { hashKey, partialMatchKey } from './utils';
+import { generateKey } from '../utils/generateKey';
+import { hashKey, partialMatchKey } from '../utils/utils';
 
-export const watchModalImpl: WatchImpl = ({ modalKey, modalInfoManageMap }) => {
+const watchModalImpl: WatchImpl = ({ modalKey, modalInfoManageMap }) => {
   return modalInfoManageMap.get(hashKey(modalKey));
 };
 
 /**
  * destroy doesn't execute modal onClose/onSubmit callbacks.
  */
-export const destroyModalImpl: DestroyImpl = async ({ modalInfoManageMap, setOpenedModalList }) => {
+const destroyModalImpl: DestroyImpl = async ({ modalInfoManageMap, setOpenedModalList }) => {
   queueMicrotask(() => {
     modalInfoManageMap.clear();
     setOpenedModalList([]);
@@ -93,7 +93,7 @@ const notifyUnIntendedCloseException = (hashedModalKey: HashedModalKey, removalR
   }
 };
 
-export const closeModalImpl: CloseModalImpl = async ({ modalKey, exact, modalInfoManageMap, setOpenedModalList }) => {
+const closeModalImpl: CloseModalImpl = async ({ modalKey, exact, modalInfoManageMap, setOpenedModalList }) => {
   const hashedModalKey: HashedModalKey = hashKey(modalKey);
 
   return new Promise<Array<ModalCallback>>((resolve) => {
@@ -155,7 +155,7 @@ const handleSubmitModal: HandleSubmitModal =
     }
   };
 
-export const openModalImpl: OpenModalImpl = ({
+const openModalImpl: OpenModalImpl = ({
   ModalComponent,
   modalCountLimit,
   modalKey,
@@ -235,10 +235,6 @@ export const generateModalAPI = ({
   };
 
   const closeModal: CloseModal = async ({ modalKey, exact }) => {
-    if (!modalKey) {
-      return;
-    }
-
     const modalCallbackList = await closeModalImpl({
       modalKey,
       exact,
@@ -253,14 +249,14 @@ export const generateModalAPI = ({
     });
   };
 
-  const openModal: OpenModal = ({ options, ...restOpenGlobalModalParam }) => {
+  const openModal: OpenModal = ({ options, ...restOpenModalProps }) => {
     openModalImpl({
       modalCountLimit: modalCountLimitRef.current,
       modalInfoManageMap,
       openedModalList,
       setOpenedModalList,
       options: { ...mode, ...options },
-      ...restOpenGlobalModalParam,
+      ...restOpenModalProps,
     });
   };
 
