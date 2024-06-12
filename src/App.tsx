@@ -1,4 +1,4 @@
-import { useGlobalModalList, useModalList, useToggleModal } from '../';
+import { useGlobalModalList, useModalList, useToggleModal } from '@/lib';
 import TestModal from './TestModal';
 import { useEffect } from 'react';
 
@@ -36,7 +36,7 @@ function App() {
     openModal({
       modalKey: ['test'],
       ModalComponent: TestModal,
-      modalProps: {},
+      modalProps: { name: '1' },
       options: { resistBackgroundClick: true },
     });
   };
@@ -45,7 +45,7 @@ function App() {
     openModal({
       modalKey: ['test', 2],
       ModalComponent: TestModal,
-      modalProps: {},
+      modalProps: { name: '1' },
       options: { resistBackgroundClick: [['test']] },
     });
   };
@@ -54,7 +54,7 @@ function App() {
     openGlobalModal({
       modalKey: ['test'],
       ModalComponent: TestModal,
-      modalProps: {},
+      modalProps: { name: '1' },
       options: { resistBackgroundClick: false },
     });
   };

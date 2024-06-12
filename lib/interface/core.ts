@@ -80,14 +80,14 @@ export interface ModalCallback {
   onSubmit?: VoidFunction;
 }
 
-export interface RequiredModalProps {
+export interface ModalProps {
   closeModal: () => Promise<void>;
   submitModal: (e?: React.BaseSyntheticEvent) => Promise<void>;
-  modalRef: ReturnType<GenerateModalRef>;
+  modalRef: ModalRef;
   currentModalKey: ModalKey;
 }
 
-export interface OptionalModalProps extends Partial<RequiredModalProps> {}
+export interface OptionalModalProps extends Partial<ModalProps> {}
 
 /**
  * modalcomponent type
@@ -105,7 +105,7 @@ export interface OptionalModalProps extends Partial<RequiredModalProps> {}
  * };
  * ```
  */
-export type ModalComponent<CustomProps = unknown> = ComponentType<CustomProps & RequiredModalProps>;
+export type ModalComponent<CustomProps = unknown> = ComponentType<CustomProps & ModalProps>;
 /**
  * modalcomponent props
  *
@@ -135,26 +135,30 @@ export interface OpenedModalState<MC extends ModalComponent = ModalComponent> {
   /**
    * The modalRef is managed as a separate property from modalProps.
    */
-  modalRef: ReturnType<GenerateModalRef>;
+  modalRef: ModalRef;
   modalProps: Omit<ComponentProps<MC>, 'modalRef' | 'currentModalKey'>;
   options?: OpenModalOptions;
   ModalComponent: MC;
 }
 
 type ExcludedKeysForProcessingOnOpenModalParam = 'hashedModalKey' | 'modalProps' | 'modalRef';
-interface OpenModalParam<MC extends ModalComponent = ModalComponent>
-  extends Omit<OpenedModalState<MC>, ExcludedKeysForProcessingOnOpenModalParam | 'internalUniqueKey'> {
-  modalProps: ModalCallback & Omit<ComponentProps<MC>, keyof RequiredModalProps>;
-}
+type OpenModalParam<MC extends ModalComponent = ModalComponent> = Omit<
+  OpenedModalState<MC>,
+  ExcludedKeysForProcessingOnOpenModalParam | 'internalUniqueKey'
+> &
+  (MC extends ModalComponent
+    ? { modalProps?: ModalCallback } // ModalComponent<unknown>
+    : { modalProps: ModalCallback & Omit<ComponentProps<MC>, keyof ModalProps> }); // ModalComponent<{ name: string }>
 export type SetOpenedModalList = Dispatch<SetStateAction<OpenedModalState<ModalComponent>[]>>;
 
-interface OpenModalImplParam<MC extends ModalComponent = ModalComponent> extends OpenModalParam<MC> {
+interface OpenModalImplParam extends OpenModalParam<ModalComponent> {
   modalCountLimit: number | null;
   openedModalList: OpenedModalState<ModalComponent>[];
   setOpenedModalList: SetOpenedModalList;
   modalInfoManageMap: ModalInfoManageMap;
 }
-export type OpenModalImpl = <MC extends ModalComponent<any>>(openModalParam: OpenModalImplParam<MC>) => void;
+
+export type OpenModalImpl = (openModalParam: OpenModalImplParam) => void;
 // export type OpenModal = <MC extends ModalComponent<{ [key: string]: any }[0]>>(
 export type OpenModal = <MC extends ModalComponent<any>>(openModalParam: OpenModalParam<MC>) => void;
 

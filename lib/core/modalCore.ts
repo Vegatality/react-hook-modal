@@ -193,8 +193,8 @@ const openModalImpl: OpenModalImpl = ({
         modalInfoManageMap,
         hashedModalKey,
         options,
-        onClose: modalProps.onClose,
-        onSubmit: modalProps.onSubmit,
+        onClose: modalProps?.onClose,
+        onSubmit: modalProps?.onSubmit,
       }),
       modalProps: {
         ...modalProps,

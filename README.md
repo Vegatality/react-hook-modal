@@ -183,7 +183,6 @@ const openModal1 = () => {
   openModal({
     modalKey: ['test'],
     ModalComponent: TestModal,
-    modalProps: {},
     options: { resistBackgroundClick: true },
   });
 };
@@ -192,7 +191,6 @@ const openModal2 = () => {
   openModal({
     modalKey: ['test', 2],
     ModalComponent: TestModal,
-    modalProps: {},
     options: { resistBackgroundClick: [['test']] },
   });
 };
@@ -201,7 +199,6 @@ const openGlobalModal1 = () => {
   openGlobalModal({
     modalKey: ['test', 2, { id: 1 }],
     ModalComponent: TestModal,
-    modalProps: {},
     options: { resistBackgroundClick: false },
   });
 };
