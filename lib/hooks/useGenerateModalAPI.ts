@@ -11,13 +11,13 @@ interface UseGenerateMoalAPIReturn extends GenerateModalAPIReturn {
 }
 
 export const useGenerateModalAPI = ({ modalCountLimit, mode }: UseGenerateModalAPIParam): UseGenerateMoalAPIReturn => {
-  const initialLimitsRef = useRef<number | null>(modalCountLimit ?? null);
+  const initialLimitRef = useRef<number | null>(modalCountLimit ?? null);
   const modalInfoManageMapRef = useRef<ModalInfoManageMap>(new Map());
   const [openedModalList, setOpenedModalList] = useState<OpenedModalState[]>([]);
 
   return {
     ...generateModalAPI({
-      modalCountLimitRef: initialLimitsRef,
+      modalCountLimitRef: initialLimitRef,
       modalInfoManageMap: modalInfoManageMapRef.current,
       openedModalList,
       setOpenedModalList,

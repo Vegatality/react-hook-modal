@@ -3,6 +3,7 @@ import { ComponentProps, ComponentType, Dispatch, RefCallback, SetStateAction } 
 export type ModalKey = ReadonlyArray<unknown>;
 export type HashedModalKey = string;
 export type ObjectFrame = Record<PropertyKey, any>;
+type DefaultComponentProps = NonNullable<unknown>;
 
 export interface OpenModalOptions {
   /**
@@ -105,7 +106,7 @@ export interface OptionalModalProps extends Partial<ModalProps> {}
  * };
  * ```
  */
-export type ModalComponent<CustomProps = unknown> = ComponentType<CustomProps & ModalProps>;
+export type ModalComponent<CustomProps = DefaultComponentProps> = ComponentType<CustomProps & ModalProps>;
 /**
  * modalcomponent props
  *
@@ -122,7 +123,7 @@ export type ModalComponent<CustomProps = unknown> = ComponentType<CustomProps & 
  * };
  * ```
  */
-export type ModalComponentProps<CustomProps = unknown> = ComponentProps<ModalComponent<CustomProps>>;
+export type ModalComponentProps<CustomProps = DefaultComponentProps> = ComponentProps<ModalComponent<CustomProps>>;
 
 export interface OpenedModalState<MC extends ModalComponent = ModalComponent> {
   /**
@@ -141,24 +142,30 @@ export interface OpenedModalState<MC extends ModalComponent = ModalComponent> {
   ModalComponent: MC;
 }
 
+export type SetOpenedModalList = Dispatch<SetStateAction<OpenedModalState<ModalComponent>[]>>;
+
 type ExcludedKeysForProcessingOnOpenModalParam = 'hashedModalKey' | 'modalProps' | 'modalRef';
+
+type DefinedModalComponentProps<MC extends ModalComponent> = Omit<ComponentProps<MC>, keyof ModalProps>;
+type InternalModalComponentProps<MC extends ModalComponent> =
+  MC extends ModalComponent<unknown>
+    ? { modalProps?: ModalCallback & Partial<DefinedModalComponentProps<MC>> } // ModalComponent<unknown> || ModalComponent
+    : { modalProps: ModalCallback & DefinedModalComponentProps<MC> }; // ModalComponent<{ name: string }>
+
 type OpenModalParam<MC extends ModalComponent = ModalComponent> = Omit<
   OpenedModalState<MC>,
   ExcludedKeysForProcessingOnOpenModalParam | 'internalUniqueKey'
 > &
-  (MC extends ModalComponent
-    ? { modalProps?: ModalCallback } // ModalComponent<unknown>
-    : { modalProps: ModalCallback & Omit<ComponentProps<MC>, keyof ModalProps> }); // ModalComponent<{ name: string }>
-export type SetOpenedModalList = Dispatch<SetStateAction<OpenedModalState<ModalComponent>[]>>;
+  InternalModalComponentProps<MC>;
 
-interface OpenModalImplParam extends OpenModalParam<ModalComponent> {
+type OpenModalImplParam = OpenModalParam & {
   modalCountLimit: number | null;
   openedModalList: OpenedModalState<ModalComponent>[];
   setOpenedModalList: SetOpenedModalList;
   modalInfoManageMap: ModalInfoManageMap;
-}
+};
 
-export type OpenModalImpl = (openModalParam: OpenModalImplParam) => void;
+export type OpenModalImpl = (openModalImplParam: OpenModalImplParam) => void;
 // export type OpenModal = <MC extends ModalComponent<{ [key: string]: any }[0]>>(
 export type OpenModal = <MC extends ModalComponent<any>>(openModalParam: OpenModalParam<MC>) => void;
 
@@ -194,7 +201,7 @@ export type GenerateModalRef = (generateModalRefParam: GenerateModalRefParam) =>
 
 interface CloseModalParam {
   /**
-   * modalKey should be a string array or a stringified modal key.
+   * modalKey should be a string array
    */
   modalKey: ModalKey;
   exact?: boolean;
@@ -227,10 +234,6 @@ interface DestroyImplParam {
 export type DestroyImpl = (destroyImplParam: DestroyImplParam) => ReturnType<Destroy>;
 export type Destroy = () => Promise<void>;
 
-/**
- * changeModalCountLimit will not destroy any currently open modals.
- * It will only affect the limit of the number of modals that can be opened.
- */
 export type ChangeModalCountLimit = (newLimits: number) => void;
 
 export interface DefaultMode extends OpenModalOptions {
@@ -247,8 +250,19 @@ export interface GenerateModalAPI {
 }
 
 export interface GenerateModalAPIReturn {
+  /**
+   * watch modal which exactly matches the modalKey.
+   */
   watch: Watch;
+  /**
+   * ## DO NOT USE THIS IN DEPENDENCY ARRAY OF `useEffect`.
+   * - destroy doesn't execute modal onClose/onSubmit callbacks.
+   */
   destroy: Destroy;
+  /**
+   * changeModalCountLimit will not destroy any currently open modals.
+   * It will only affect the limit of the number of modals that can be opened.
+   */
   changeModalCountLimit: ChangeModalCountLimit;
   closeModal: CloseModal;
   openModal: OpenModal;

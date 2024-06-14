@@ -25,9 +25,6 @@ const watchModalImpl: WatchImpl = ({ modalKey, modalInfoManageMap }) => {
   return modalInfoManageMap.get(hashKey(modalKey));
 };
 
-/**
- * destroy doesn't execute modal onClose/onSubmit callbacks.
- */
 const destroyModalImpl: DestroyImpl = async ({ modalInfoManageMap, setOpenedModalList }) => {
   queueMicrotask(() => {
     modalInfoManageMap.clear();

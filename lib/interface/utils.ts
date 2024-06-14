@@ -33,5 +33,5 @@ export type PathInto<T extends Record<string, any>> = keyof {
 };
 
 export type MutateReadonlyPropToNormal<T extends object> = {
-  -readonly [P in keyof T]: T[P];
+  -readonly [P in keyof T]: T[P] extends object ? MutateReadonlyPropToNormal<T[P]> : T[P];
 };
