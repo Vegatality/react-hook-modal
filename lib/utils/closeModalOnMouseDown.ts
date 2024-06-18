@@ -33,7 +33,7 @@ export const setCloseOnMouseDown = ({ modalInfoManageMap, closeModal }: SetClose
       }
 
       // close the last modal if the modal is not persist and the click is outside of the modal
-      if (modalRef && e.target && modalRef.contains(e.target as Node)) {
+      if (modalRef && e.target && !modalRef.contains(e.target as Node)) {
         closeModal({ modalKey, exact: true });
         return;
       }
