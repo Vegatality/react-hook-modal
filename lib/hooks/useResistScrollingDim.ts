@@ -28,11 +28,12 @@ export const useResistScrollingDim = ({ modalInfoManageMap, dependencyList = [] 
     document.body.style.top = `-${window.scrollY}px`;
     const scrollY = document.documentElement.scrollTop;
     document.body.style.position = 'fixed';
-    document.body.style.width = '100%';
+    // document.body.style.width = '100%';
 
     return () => {
       document.body.style.position = '';
       document.body.style.top = '';
+      // document.body.style.width = '';
       window.scrollTo({ top: scrollY, behavior: 'instant' });
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

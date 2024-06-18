@@ -1,6 +1,8 @@
 import { RefCallback } from 'react';
 import {
   ChangeModalCountLimit,
+  ChangeModalOptions,
+  ChangeModalOptionsImpl,
   CloseModal,
   CloseModalImpl,
   Destroy,
@@ -30,6 +32,24 @@ const destroyModalImpl: DestroyImpl = async ({ modalInfoManageMap, setOpenedModa
     modalInfoManageMap.clear();
     setOpenedModalList([]);
   });
+};
+
+const changeModalOptionsImpl: ChangeModalOptionsImpl = ({
+  modalKey,
+  modalInfoManageMap,
+  optionsToUpdate,
+  forceUpdate,
+  isForceUpdate = true,
+}) => {
+  const modalInfo = modalInfoManageMap.get(hashKey(modalKey));
+
+  if (modalInfo) {
+    modalInfo.options = { ...modalInfo.options, ...optionsToUpdate };
+
+    if (isForceUpdate) {
+      forceUpdate();
+    }
+  }
 };
 
 const generateModalRef: GenerateModalRef = ({
@@ -217,6 +237,7 @@ export const generateModalAPI = ({
   openedModalList,
   modalCountLimitRef,
   mode,
+  forceUpdate,
   setOpenedModalList,
 }: GenerateModalAPI): GenerateModalAPIReturn => {
   const watch: Watch = ({ modalKey }) => watchModalImpl({ modalKey, modalInfoManageMap });
@@ -229,6 +250,10 @@ export const generateModalAPI = ({
 
   const changeModalCountLimit: ChangeModalCountLimit = (newLimits) => {
     modalCountLimitRef.current = newLimits;
+  };
+
+  const changeModalOptions: ChangeModalOptions = (changeModalOptionsParam) => {
+    changeModalOptionsImpl({ ...changeModalOptionsParam, forceUpdate, modalInfoManageMap });
   };
 
   const closeModal: CloseModal = async ({ modalKey, exact }) => {
@@ -261,6 +286,7 @@ export const generateModalAPI = ({
     watch,
     destroy,
     changeModalCountLimit,
+    changeModalOptions,
     closeModal,
     openModal,
   };

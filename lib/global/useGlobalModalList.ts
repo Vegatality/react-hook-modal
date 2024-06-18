@@ -1,6 +1,6 @@
 'use client';
 
-import { DefaultMode, ModalComponent, OpenModal } from '../interface';
+import { DefaultMode, IGlobalModalListDispatchContext, ModalComponent, OpenModal } from '../interface';
 import { useGlobalModalListDispatch } from './useGlobalModalListDispatch';
 
 interface UseGlobalModalListOptions {
@@ -11,7 +11,9 @@ interface UseGlobalModalListOptions {
   mode?: DefaultMode;
 }
 
-export const useGlobalModalList = (useGlobalModalListOptions: UseGlobalModalListOptions = {}) => {
+export const useGlobalModalList = (
+  useGlobalModalListOptions: UseGlobalModalListOptions = {},
+): IGlobalModalListDispatchContext => {
   const { openGlobalModal, ...restAPI } = useGlobalModalListDispatch();
 
   const openGlobalModalWithDefaultMode: OpenModal = ({ options, ...restOpenGlobalModalParam }) => {

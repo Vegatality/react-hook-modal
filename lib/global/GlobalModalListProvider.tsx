@@ -8,19 +8,36 @@ import { GlobalModalListProviderProps, IGlobalModalListDispatchContext } from '.
 import { GlobalModalListDispatchContext, GlobalModalListStateContext } from './useGlobalModalListDispatch';
 
 export const GlobalModalListProvider = ({ children, modalCountLimit, mode }: GlobalModalListProviderProps) => {
-  const { changeModalCountLimit, closeModal, destroy, modalInfoManageMap, openModal, openedModalList, watch } =
-    useGenerateModalAPI({
-      modalCountLimit,
-      mode,
-    });
+  const {
+    changeModalCountLimit,
+    closeModal,
+    destroy,
+    modalInfoManageMap,
+    openModal,
+    openedModalList,
+    watch,
+    changeModalOptions,
+    forceUpdateState,
+  } = useGenerateModalAPI({
+    modalCountLimit,
+    mode,
+  });
 
-  const dispatch: IGlobalModalListDispatchContext = useMemo(
+  const immutableDispatchReference: Omit<IGlobalModalListDispatchContext, 'openGlobalModal' | 'watchGlobalModal'> =
+    useMemo(
+      () => ({
+        closeGlobalModal: closeModal,
+        destroyGlobalModal: destroy,
+        changeGlobalModalCountLimit: changeModalCountLimit,
+        changeGlobalModalOptions: changeModalOptions,
+      }),
+      [],
+    );
+
+  const mutableDispatchReference = useMemo(
     () => ({
-      closeGlobalModal: closeModal,
-      destroyGlobalModal: destroy,
       openGlobalModal: openModal,
       watchGlobalModal: watch,
-      changeGlobalModalCountLimit: changeModalCountLimit,
     }),
     [openedModalList],
   );
@@ -28,14 +45,15 @@ export const GlobalModalListProvider = ({ children, modalCountLimit, mode }: Glo
   useCloseModalOnEventFire({
     modalInfoManageMap,
     closeModal,
+    dependencyList: [forceUpdateState],
   });
   useResistScrollingDim({
     modalInfoManageMap,
-    dependencyList: [openedModalList],
+    dependencyList: [openedModalList, forceUpdateState],
   });
 
   return (
-    <GlobalModalListDispatchContext.Provider value={dispatch}>
+    <GlobalModalListDispatchContext.Provider value={{ ...immutableDispatchReference, ...mutableDispatchReference }}>
       <GlobalModalListStateContext.Provider value={openedModalList}>{children}</GlobalModalListStateContext.Provider>
     </GlobalModalListDispatchContext.Provider>
   );

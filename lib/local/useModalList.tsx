@@ -6,11 +6,20 @@ import { useResistScrollingDim } from '../hooks/useResistScrollingDim';
 import { UseModalList } from '../interface';
 
 export const useModalList: UseModalList = (useModalListOptions = {}) => {
-  const { changeModalCountLimit, closeModal, destroy, modalInfoManageMap, openModal, openedModalList, watch } =
-    useGenerateModalAPI({
-      modalCountLimit: useModalListOptions.modalCountLimit,
-      mode: useModalListOptions.mode,
-    });
+  const {
+    changeModalCountLimit,
+    closeModal,
+    destroy,
+    modalInfoManageMap,
+    openModal,
+    openedModalList,
+    watch,
+    changeModalOptions,
+    forceUpdateState,
+  } = useGenerateModalAPI({
+    modalCountLimit: useModalListOptions.modalCountLimit,
+    mode: useModalListOptions.mode,
+  });
 
   const ModalComponentList = () => {
     return openedModalList.map(({ modalKey, modalRef, modalProps, ModalComponent, internalUniqueKey }) => {
@@ -21,8 +30,9 @@ export const useModalList: UseModalList = (useModalListOptions = {}) => {
   useCloseModalOnEventFire({
     modalInfoManageMap,
     closeModal,
+    dependencyList: [forceUpdateState],
   });
-  useResistScrollingDim({ modalInfoManageMap, dependencyList: [openedModalList] });
+  useResistScrollingDim({ modalInfoManageMap, dependencyList: [openedModalList, forceUpdateState] });
 
-  return { watch, destroy, changeModalCountLimit, openModal, closeModal, ModalComponentList };
+  return { watch, destroy, changeModalCountLimit, changeModalOptions, openModal, closeModal, ModalComponentList };
 };

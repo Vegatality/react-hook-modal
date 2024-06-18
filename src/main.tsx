@@ -6,8 +6,8 @@ import { GlobalModalList, GlobalModalListProvider } from '@/lib';
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <GlobalModalListProvider>
-      <App />
       <GlobalModalList />
+      <App />
     </GlobalModalListProvider>
   </React.StrictMode>,
 );

@@ -191,7 +191,7 @@ const openModal2 = () => {
   openModal({
     modalKey: ['test', 2],
     ModalComponent: TestModal,
-    options: { resistBackgroundClick: [['test']] },
+    options: { resistBackgroundClick: [['test']] }, // This will resist background click until ['test'] modal is closed
   });
 };
 

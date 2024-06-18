@@ -1,4 +1,4 @@
-import { ComponentProps, ComponentType, Dispatch, RefCallback, SetStateAction } from 'react';
+import { ComponentProps, ComponentType, Dispatch, DispatchWithoutAction, RefCallback, SetStateAction } from 'react';
 
 export type ModalKey = ReadonlyArray<unknown>;
 export type HashedModalKey = string;
@@ -145,13 +145,10 @@ export interface OpenedModalState<MC extends ModalComponent = ModalComponent> {
 export type SetOpenedModalList = Dispatch<SetStateAction<OpenedModalState<ModalComponent>[]>>;
 
 type ExcludedKeysForProcessingOnOpenModalParam = 'hashedModalKey' | 'modalProps' | 'modalRef';
-
 type DefinedModalComponentProps<MC extends ModalComponent> = Omit<ComponentProps<MC>, keyof ModalProps>;
-type InternalModalComponentProps<MC extends ModalComponent> =
-  MC extends ModalComponent<unknown>
-    ? { modalProps?: ModalCallback & Partial<DefinedModalComponentProps<MC>> } // ModalComponent<unknown> || ModalComponent
-    : { modalProps: ModalCallback & DefinedModalComponentProps<MC> }; // ModalComponent<{ name: string }>
-
+type InternalModalComponentProps<MC extends ModalComponent> = MC extends ModalComponent
+  ? { modalProps?: ModalCallback & DefinedModalComponentProps<MC> } // ModalComponent<unknown> | ModalComponent | ModalComponent<{ name?: string }>
+  : { modalProps: ModalCallback & DefinedModalComponentProps<MC> }; // ModalComponent<{ name: string }>
 type OpenModalParam<MC extends ModalComponent = ModalComponent> = Omit<
   OpenedModalState<MC>,
   ExcludedKeysForProcessingOnOpenModalParam | 'internalUniqueKey'
@@ -166,7 +163,6 @@ type OpenModalImplParam = OpenModalParam & {
 };
 
 export type OpenModalImpl = (openModalImplParam: OpenModalImplParam) => void;
-// export type OpenModal = <MC extends ModalComponent<{ [key: string]: any }[0]>>(
 export type OpenModal = <MC extends ModalComponent<any>>(openModalParam: OpenModalParam<MC>) => void;
 
 interface ModalInfoManageMapState
@@ -234,6 +230,23 @@ interface DestroyImplParam {
 export type DestroyImpl = (destroyImplParam: DestroyImplParam) => ReturnType<Destroy>;
 export type Destroy = () => Promise<void>;
 
+interface ChangeModalOptionsParam {
+  modalKey: ModalKey;
+  optionsToUpdate: OpenModalOptions;
+  /**
+   * If this is set to true, will force update the modalList with rerendering.
+   * @default true
+   */
+  isForceUpdate?: boolean;
+}
+interface ChangeModalOptionsImplParam extends ChangeModalOptionsParam {
+  modalInfoManageMap: ModalInfoManageMap;
+  forceUpdate: DispatchWithoutAction;
+}
+
+export type ChangeModalOptionsImpl = (changeModalOptionsImplParam: ChangeModalOptionsImplParam) => void;
+export type ChangeModalOptions = (changeModalOptionsParam: ChangeModalOptionsParam) => void;
+
 export type ChangeModalCountLimit = (newLimits: number) => void;
 
 export interface DefaultMode extends OpenModalOptions {
@@ -246,6 +259,7 @@ export interface GenerateModalAPI {
   openedModalList: OpenedModalState[];
   modalCountLimitRef: React.MutableRefObject<number | null>;
   mode?: DefaultMode;
+  forceUpdate: DispatchWithoutAction;
   setOpenedModalList: SetOpenedModalList;
 }
 
@@ -264,6 +278,7 @@ export interface GenerateModalAPIReturn {
    * It will only affect the limit of the number of modals that can be opened.
    */
   changeModalCountLimit: ChangeModalCountLimit;
+  changeModalOptions: ChangeModalOptions;
   closeModal: CloseModal;
   openModal: OpenModal;
 }
